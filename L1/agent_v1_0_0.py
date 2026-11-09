@@ -19,6 +19,7 @@ messages = [
             "requirements and return the correct approval-routing artifact based on software price."
             "If approval request is pending by any approver, it does not mean automatic approval. Recognize that "
             "silence cannot authorize spending.\n"
+            "Self-approval is not allowed. If the requester and the manager are the same person, do not route the request and output exactly: 'Routing cannot be completed: self-approval is not allowed. The requester cannot be their own approver. Manual escalation required.'\n"
             "Approvers List:\n"
             "1. Manager\n"
             "2. IT Lead\n"

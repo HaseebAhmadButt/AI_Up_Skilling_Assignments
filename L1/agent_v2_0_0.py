@@ -15,7 +15,7 @@ POLICY_VERSION = "v2.0.0"
 MANAGER_DIRECTORY = {
     "E1001": {"name": "Sara Khan", "title": "Marketing Analyst", "department": "Marketing", "manager_id": "E2001"},
     "E1002": {"name": "Haseeb Ahmad", "title": "Marketing Executive", "department": "Marketing", "manager_id": "E2001"},
-    # Self-managed on purpose, so the self-approval test cases (T25 to T29) stay meaningful.
+    # Self-managed on purpose, so the self-approval block (T25 to T29) stays testable.
     "E2001": {"name": "Ali Raza", "title": "Manager Marketing Department", "department": "Marketing", "manager_id": "E2001"},
     "E3001": {"name": "Omar Sheikh", "title": "IT Lead", "department": "IT", "manager_id": None},
     "E4001": {"name": "Nadia Malik", "title": "Finance Director", "department": "Finance", "manager_id": None},
@@ -25,6 +25,7 @@ ROLE_HOLDERS = {"it lead": "E3001", "finance director": "E4001"}
 
 COST_PATTERN = re.compile(r"^\$?\s*(\d{1,3}(,\d{3})+|\d+)(\.\d{1,2})?$")
 INVALID_COST_MESSAGE = "Invalid request: Request cost must be a single positive amount, for example $1,800."
+SELF_APPROVAL_MESSAGE = "Routing cannot be completed: self-approval is not allowed. The requester cannot be their own approver. Manual escalation required."
 
 
 def _normalize(text):
@@ -88,6 +89,8 @@ def lookup_requester_manager(requester_identity: str, provided_manager_name: str
 
     # The manager always comes from the requester's record (system of record).
     manager_id = MANAGER_DIRECTORY[requester_id]["manager_id"]
+    if manager_id == requester_id:
+        return {"found": False, "error": SELF_APPROVAL_MESSAGE}
     if not manager_id or manager_id not in MANAGER_DIRECTORY:
         return {"found": False, "error": "Routing cannot be completed: no manager is on record for this requester. Manual escalation required."}
 
@@ -103,7 +106,6 @@ def lookup_requester_manager(requester_identity: str, provided_manager_name: str
         "found": True,
         "requester": _person(requester_id),
         "manager": _person(manager_id),
-        "requester_is_manager": requester_id == manager_id,
     }
 
 
@@ -174,9 +176,8 @@ messages = [
             "4. For every required role other than Manager, call lookup_role_holder with that role. If any lookup "
             "fails, output 'Routing cannot be completed: manual escalation required.' and stop.\n"
             "5. Build the approver list using only tool results, in the order given by required_roles. The Manager is "
-            "the manager returned by lookup_requester_manager. If requester_is_manager is true, the requester is "
-            "the manager and has the right to approve the request in the Manager step, so list them as the Manager "
-            "and state this in the reason. This does not remove or replace the IT Lead or Finance Director steps.\n"
+            "the manager returned by lookup_requester_manager. Self-approval is never allowed: a requester can never "
+            "be their own approver. If lookup_requester_manager reports self-approval, output its error text exactly and stop.\n"
             "6. If a tool fails or returns an error, never guess names. Output the error text from the tool.\n"
             "\n"
             "OUTPUT FORMAT (approvals only)\n"
