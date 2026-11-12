@@ -1,6 +1,8 @@
 """In-memory workflow store. Only validated, initialized workflows are ever added here."""
+import threading
 
 approval_workflows = {}
+lock = threading.RLock()  # shared by the scheduler thread and the interactive portals
 _counter = 0
 
 
@@ -40,6 +42,18 @@ def update_workflow(request_id, **fields):
 
 def list_active_workflows():
     return [w for w in approval_workflows.values() if w["status"] == "pending"]
+
+
+def find_duplicate_request(email, software):
+    """Return the existing request_id for the same requester email and software (case/space-insensitive), or None."""
+    key = (" ".join(str(email).split()).lower(), " ".join(str(software).split()).lower())
+    for workflow in approval_workflows.values():
+        request = workflow["request"]
+        existing = (" ".join(str(request.get("requester_email", "")).split()).lower(),
+                    " ".join(str(request.get("policy_context", "")).split()).lower())
+        if existing == key:
+            return workflow["request_id"]
+    return None
 
 
 def clear_workflows():

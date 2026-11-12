@@ -1,0 +1,54 @@
+17:01:18 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 1800, 'requester_identity': 'E1001, Marketing Analyst, Marketing', 'manager_name': 'Ali Raza', 'policy_context': 'test'}
+17:01:18 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+17:01:18 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}], 'reason': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+17:01:18 [INFO] [MainThread] approval.submission: Step 4: validation passed
+17:01:18 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0001 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department'), ('E3001', 'Omar Sheikh', 'IT Lead')]
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] history: submitted by E1001, Marketing Analyst, Marketing - Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] history: notified by system - Notified Ali Raza (E2001).
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] decision attempt: approver=E2001 decision=APPROVED reason=None
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] decision result: success=True message=Decision recorded; awaiting scheduler processing.
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] scheduler found unprocessed APPROVED decision from E2001
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] history: approve by E2001 - Ali Raza recorded 'approve'.
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] transition: approve
+17:01:18 [INFO] [MainThread] approval.workflow: [REQ-0001] history: notified by system - Notified Omar Sheikh (E3001).
+17:01:18 [INFO] [MainThread] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0001'], 'reminded': [], 'escalated': []}
+17:16:37 [INFO] [MainThread] approval.main: Application started
+17:16:37 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+17:16:37 [INFO] [MainThread] approval.main: Menu selection: '1'
+17:16:37 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 1800.0, 'requester_identity': 'E1001', 'requester_email': 'sara.khan@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'Figma', 'business_justification': 'Design'}
+17:16:37 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $1,800.00\nRequester identity: E1001\nManager name: Ali Raza\nPolicy context: Figma'
+17:16:38 [ERROR] [MainThread] approval.submission: Step 2: technical failure while calling the agent; no workflow created
+Traceback (most recent call last):
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/L2/workflow/submission.py", line 81, in submit_request
+    output = route_fn(request)
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/L2/workflow/submission.py", line 37, in default_route_fn
+    return get_approval_routing(conversation, verbose=False)
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/L2/workflow/submission.py", line 64, in get_approval_routing
+    return invoke_agent(conversation, tools=TOOLS, tool_map=TOOL_MAP, max_steps=max_steps, verbose=verbose)
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/L2/common.py", line 129, in invoke_agent
+    llm = ChatOpenAI(
+        model="gpt-4o",
+    ...<2 lines>...
+        max_tokens=500,
+    )
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/.venv/lib/python3.14/site-packages/langchain_core/load/serializable.py", line 136, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/.venv/lib/python3.14/site-packages/pydantic/main.py", line 280, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/.venv/lib/python3.14/site-packages/langchain_openai/chat_models/base.py", line 1526, in validate_environment
+    self.root_client = openai.OpenAI(**client_params, **sync_specific)  # type: ignore[arg-type]
+                       ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/.venv/lib/python3.14/site-packages/openai/_client.py", line 323, in __init__
+    return sync__init__(
+        _runtime_cast(_RuntimeAny, super()).__thisclass__,
+    ...<17 lines>...
+        _enforce_credentials=_enforce_credentials,
+    )
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/.venv/lib/python3.14/site-packages/openai/lib/_client_auth.py", line 199, in sync__init__
+    raise _sdk_client.OpenAIError(
+        "Missing credentials. Please pass an `api_key`, `workload_identity`, `admin_api_key`, or set the `OPENAI_API_KEY` or `OPENAI_ADMIN_KEY` environment variable."
+    )
+openai.OpenAIError: Missing credentials. Please pass an `api_key`, `workload_identity`, `admin_api_key`, or set the `OPENAI_API_KEY` or `OPENAI_ADMIN_KEY` environment variable.
+17:16:38 [INFO] [MainThread] approval.main: Menu selection: '6'
+17:16:38 [INFO] [MainThread] approval.main: Application stopped

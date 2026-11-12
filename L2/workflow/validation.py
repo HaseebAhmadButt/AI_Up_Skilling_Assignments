@@ -1,7 +1,7 @@
 """Deterministic validation of the agent's result. The LLM output is never trusted on its own."""
 from decimal import Decimal, InvalidOperation
 
-from mock_data import POLICY_VERSION, get_employee, get_policy_rule, get_role_holder_id
+from mock_data import POLICY_VERSION, get_employee, get_policy_rule, get_role_holder_id, manager_stage_approver_id
 from tools._shared import normalize
 
 
@@ -38,7 +38,8 @@ def validate_agent_result(result: dict, request: dict) -> bool:
     requester = get_employee(requester_id)
     if requester is None or requester_id in ids:
         return False
-    manager_id = requester["manager_id"]
+    # Manager stage: the manager on record, or the configured substitute when the requester manages themselves.
+    manager_id = manager_stage_approver_id(requester_id)
     if not manager_id or manager_id == requester_id:
         return False
 
