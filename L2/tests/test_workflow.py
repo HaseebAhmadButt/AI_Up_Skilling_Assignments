@@ -2,7 +2,7 @@
 import itertools
 import unittest
 
-from mock_data import clear_notifications, sent_notifications
+from mock_data import clear_notifications, get_employee, sent_notifications
 from tools import get_approval_policy, lookup_requester_manager, lookup_role_holder
 from workflow.routing import build_routing_message
 from workflow.scheduler import process_workflows
@@ -17,7 +17,8 @@ def fake_agent(request):
     policy = get_approval_policy.invoke({"request_cost": str(request["request_cost"])})
     if not policy["valid"]:
         return policy["error"]
-    manager = lookup_requester_manager.invoke({"requester_identity": request["requester_identity"]})
+    manager = lookup_requester_manager.invoke({"requester_identity": request["requester_identity"],
+                                               "provided_manager_name": request.get("manager_name", "")})
     if not manager["found"]:
         return manager["error"]
     people = [manager["manager"]]
@@ -45,8 +46,12 @@ def fake_router(workflow):
 _software_counter = itertools.count(1)
 
 
-def make_request(cost, requester="E1001, Marketing Analyst, Marketing", email="sara.khan@example.com", software=None):
+def make_request(cost, requester="E1001, Marketing Analyst, Marketing", email=None, software=None):
     # A fresh software name per call keeps unrelated tests from tripping the duplicate check.
+    # The email defaults to the one on record for the requester ID (a mismatch is refused).
+    if email is None:
+        record = get_employee(requester.split(",")[0].strip())
+        email = record["email"] if record else "unknown@example.com"
     return {"request_cost": cost, "requester_identity": requester, "requester_email": email,
             "manager_name": "Ali Raza", "policy_context": software or f"test-{next(_software_counter)}"}
 
@@ -77,7 +82,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn(first["request_id"], duplicate["error"])
         self.assertEqual(len(approval_workflows), 1)
         self.assertTrue(submit_request(make_request(400, software="Slack"), route_fn=fake_agent)["success"])
-        self.assertTrue(submit_request(make_request(400, email="other@example.com", software="Figma"),
+        self.assertTrue(submit_request(make_request(400, "E1002, Marketing Executive, Marketing", software="Figma"),
                                        route_fn=fake_agent)["success"])
 
     def test_valid_requester_email_is_required(self):
@@ -315,6 +320,91 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(outcome["error_type"], "technical")
         self.assertEqual(self.submit(-5)["error_type"], "business_rule")
         self.assertEqual(approval_workflows, {})
+
+    def test_email_must_belong_to_requester_identity(self):
+        # REQ-0001 case: Ali Raza (E2001) submitted with haseeb.ahmad@example.com.
+        outcome = submit_request(make_request(3000, "E2001, Manager Marketing Department, Marketing",
+                                              email="haseeb.ahmad@example.com"), route_fn=fake_agent)
+        self.assertFalse(outcome["success"])
+        self.assertIn("Identity mismatch", outcome["error"])
+        self.assertEqual(approval_workflows, {})
+
+    def test_complete_requires_every_approver_approved(self):
+        rid = self.submit(1800)["request_id"]
+        workflow = approval_workflows[rid]
+        chain = workflow["approval_chain"]
+        submit_decision(rid, "E2001", "APPROVED")
+        process_workflows(next_step_fn=fake_router)
+        submit_decision(rid, "E3001", "APPROVED")
+        chain[0]["decision"] = None  # tamper: an earlier approver is not APPROVED
+        for _ in range(3):
+            process_workflows(next_step_fn=lambda w: "ACTION: COMPLETE\nREASON: done")
+        self.assertNotEqual(workflow["status"], "approved")
+
+    def test_complete_before_last_approver_is_refused(self):
+        rid = self.submit(1800)["request_id"]
+        submit_decision(rid, "E2001", "APPROVED")
+        for _ in range(3):
+            process_workflows(next_step_fn=lambda w: "ACTION: COMPLETE\nREASON: skip")
+        self.assertEqual(approval_workflows[rid]["status"], "escalated")
+        self.assertEqual(approval_workflows[rid]["current_approver_index"], 0)
+
+    def test_unparseable_agent_output_never_advances(self):
+        rid = self.submit(1800)["request_id"]
+        workflow = approval_workflows[rid]
+        submit_decision(rid, "E2001", "APPROVED")
+        for garbage in ("", None, "approve it", "ACTION: MAYBE", "ACTION: COMPLETE\nACTION: REJECT"):
+            process_workflows(next_step_fn=lambda w, g=garbage: g)
+            self.assertEqual((workflow["status"], workflow["current_approver_index"]), ("pending", 0))
+            workflow["approval_chain"][0]["routing_attempts"] = 0
+
+    def test_agent_output_with_trailing_spaces_is_parsed(self):
+        rid = self.submit(1800)["request_id"]
+        submit_decision(rid, "E2001", "APPROVED")
+        process_workflows(next_step_fn=lambda w: "ACTION: ASSIGN_NEXT  \nNEXT_APPROVER: Omar Sheikh  \nREASON: ok  \n")
+        self.assertEqual(approval_workflows[rid]["current_approver_index"], 1)
+
+    def test_routing_message_labels_first_stage_manager(self):
+        rid = self.submit(1800)["request_id"]
+        submit_decision(rid, "E2001", "APPROVED")
+        message = build_routing_message(approval_workflows[rid])
+        self.assertIn("1. Manager - Ali Raza (E2001): APPROVED", message)
+        self.assertNotIn("Manager Marketing Department", message)
+
+    def test_substitute_cannot_be_the_requester(self):
+        from mock_data import employees
+        saved = dict(employees.SUBSTITUTE_APPROVERS)
+        employees.SUBSTITUTE_APPROVERS["E2001"] = "E2001"
+        try:
+            outcome = self.submit(1800, "E2001, Manager Marketing Department, Marketing")
+        finally:
+            employees.SUBSTITUTE_APPROVERS.clear()
+            employees.SUBSTITUTE_APPROVERS.update(saved)
+        self.assertFalse(outcome["success"])
+        self.assertEqual(approval_workflows, {})
+
+    def test_resubmission_after_rejection_is_allowed_but_not_while_open(self):
+        first = submit_request(make_request(400, software="Figma"), route_fn=fake_agent)
+        rid = first["request_id"]
+        self.assertFalse(submit_request(make_request(400, software="Figma"), route_fn=fake_agent)["success"])
+        submit_decision(rid, "E2001", "REJECTED", "Not needed right now")
+        process_workflows(next_step_fn=fake_router)
+        self.assertEqual(approval_workflows[rid]["status"], "rejected")
+        again = submit_request(make_request(400, software="Figma"), route_fn=fake_agent)
+        self.assertTrue(again["success"])
+        self.assertNotEqual(again["request_id"], rid)
+        self.assertEqual(approval_workflows[rid]["status"], "rejected")  # old request untouched
+
+    def test_silence_is_never_inferred_as_approval(self):
+        rid = self.submit(1800)["request_id"]
+        workflow = approval_workflows[rid]
+        start = workflow["approval_chain"][0]["notified_at"]
+        day = 24 * 3600
+        for n in range(1, 5):
+            process_workflows(now=start + n * day + n, next_step_fn=fake_router)
+        self.assertEqual(workflow["status"], "escalated")
+        self.assertTrue(all(s["decision"] is None for s in workflow["approval_chain"]))
+        self.assertNotIn("approved", [h["event"] for h in workflow["history"]])
 
     def test_duplicate_workflow_id_refused(self):
         create_workflow("X", make_request(100), [])

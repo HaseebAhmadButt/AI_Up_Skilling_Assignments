@@ -45,9 +45,12 @@ def list_active_workflows():
 
 
 def find_duplicate_request(email, software):
-    """Return the existing request_id for the same requester email and software (case/space-insensitive), or None."""
+    """Return the existing request_id for the same requester email and software (case/space-insensitive), or None.
+    A rejected request does not block a new one; pending, approved, blocked and escalated requests do."""
     key = (" ".join(str(email).split()).lower(), " ".join(str(software).split()).lower())
     for workflow in approval_workflows.values():
+        if workflow["status"] == "rejected":
+            continue
         request = workflow["request"]
         existing = (" ".join(str(request.get("requester_email", "")).split()).lower(),
                     " ".join(str(request.get("policy_context", "")).split()).lower())

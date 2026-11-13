@@ -3,7 +3,7 @@ import logging
 import time
 from datetime import datetime
 
-from mock_data import send_notification
+from mock_data import get_employee, send_notification
 from .store import get_workflow
 
 log = logging.getLogger("approval.workflow")
@@ -39,6 +39,11 @@ def notify_approver(workflow, now=None):
 
 
 REJECTED_MESSAGE = "This request has already been rejected and cannot be modified."
+SELF_APPROVAL_MESSAGE = "Not authorized: a requester can never approve or reject their own request."
+
+
+def requester_id_of(workflow):
+    return str(workflow["request"].get("requester_identity", "")).split(",")[0].strip().upper()
 APPROVED, REJECTED = "APPROVED", "REJECTED"
 MIN_REASON_CHARS = 10
 MIN_REASON_WORDS = 2
@@ -77,6 +82,12 @@ def submit_decision(request_id, approver_id, decision, reason=None):
     if workflow["status"] != "pending":
         return _result(workflow, False, f"Workflow is {workflow['status']}; no further decisions accepted.")
 
+    # Self-approval is blocked in every scenario, whatever stage or role the requester holds.
+    requester_id = requester_id_of(workflow)
+    if approver_id and str(approver_id).strip().upper() == requester_id:
+        log.warning("[%s] SELF-APPROVAL BLOCKED: %s tried to decide their own request", request_id, requester_id)
+        return _result(workflow, False, SELF_APPROVAL_MESSAGE)
+
     for step in workflow["approval_chain"]:
         if step["employee_id"] == approver_id and step["decision"] is not None:
             return _result(workflow, False, "A decision has already been recorded by this approver.")
@@ -90,17 +101,23 @@ def submit_decision(request_id, approver_id, decision, reason=None):
     step["decision"] = decision
     step["decided_by"] = approver_id
     step["decided_at"] = datetime.now().isoformat(timespec="seconds")
-    step["reason"] = reason.strip() if decision == REJECTED else None
+    step["reason"] = " ".join(reason.split()) if decision == REJECTED else None  # one line: no newline injection
     step["processed"] = False
     step["resulting_state"] = "pending: decision recorded, awaiting Agent routing"
+    # When the requester manages themselves, the first stage is decided by the configured substitute: say so.
+    requester = get_employee(requester_id)
+    who = step["name"]
+    if workflow["current_approver_index"] == 0 and requester and requester["manager_id"] == requester_id \
+            and approver_id != requester_id:
+        who = f"{step['name']} (substitute for {requester['name']}, the requester and manager of record)"
     # The approver only raises a flag. Routing (next approver, completion or blocking) is decided by the Agent
     # on the next scheduler pass, so the current stage stays where it is and shows the recorded decision.
     if decision == APPROVED:
         add_history(workflow, "approve", approver_id,
-                    f"{step['name']} approved the request. Resulting state: {step['resulting_state']}.")
+                    f"{who} approved the request. Resulting state: {step['resulting_state']}.")
     else:
         add_history(workflow, "reject", approver_id,
-                    f"{step['name']} rejected the request. Reason: {step['reason']}. "
+                    f"{who} rejected the request. Reason: {step['reason']}. "
                     f"Resulting state: {step['resulting_state']}.")
     return _result(workflow, True, "Decision recorded; awaiting Agent routing on the next scheduler pass.")
 

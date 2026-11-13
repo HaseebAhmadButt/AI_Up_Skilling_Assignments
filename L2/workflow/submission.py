@@ -2,10 +2,10 @@
 import logging
 import re
 
-from mock_data import find_employee_id_by_name
+from mock_data import find_employee_id_by_name, get_employee
 from tools._shared import normalize
 from .store import create_workflow, find_duplicate_request, lock, next_request_id
-from .validation import validate_agent_result
+from .validation import requester_id_from, validate_agent_result
 from .workflow_tools import add_history, notify_approver
 
 from common import invoke_agent
@@ -72,6 +72,13 @@ def submit_request(request: dict, route_fn=None) -> dict:
     if not EMAIL_PATTERN.match(email):
         return _business_error("Invalid request: a valid Requester email is required.")
     request = {**request, "requester_email": email.lower()}
+    # The email must belong to the stated identity. A mismatch is never guessed around; the request is refused.
+    record = get_employee(requester_id_from(request))
+    if record and record["email"].lower() != request["requester_email"]:
+        log.warning("Step 1: identity mismatch: %s is %s (%s), not %s", requester_id_from(request),
+                    record["name"], record["email"], request["requester_email"])
+        return _business_error(f"Identity mismatch: {request['requester_email']} is not the email on record for "
+                               f"{record['name']} ({requester_id_from(request)}).")
     with lock:
         duplicate = _duplicate_error(request)
     if duplicate:

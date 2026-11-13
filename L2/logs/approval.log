@@ -52,3 +52,424 @@ Traceback (most recent call last):
 openai.OpenAIError: Missing credentials. Please pass an `api_key`, `workload_identity`, `admin_api_key`, or set the `OPENAI_API_KEY` or `OPENAI_ADMIN_KEY` environment variable.
 17:16:38 [INFO] [MainThread] approval.main: Menu selection: '6'
 17:16:38 [INFO] [MainThread] approval.main: Application stopped
+21:01:35 [INFO] [MainThread] approval.main: Application started
+21:01:35 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+21:01:38 [INFO] [MainThread] approval.main: Menu selection: '6'
+21:01:38 [INFO] [MainThread] approval.main: Application stopped
+21:01:58 [INFO] [MainThread] approval.main: Application started
+21:01:58 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+21:01:58 [INFO] [MainThread] approval.main: Menu selection: 'source "/Users/hbutt/Desktop/Personal/AI Up-skilling/.venv/bin/activate"'
+21:02:04 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:02:50 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 499.0, 'requester_identity': 'E1001', 'requester_email': 'sara.khan@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'VS Code', 'business_justification': 'Development'}
+21:02:50 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $499.00\nRequester identity: E1001\nManager name: Ali Raza\nPolicy context: VS Code'
+21:02:50 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:02:50 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:02:53 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 1 tool(s): get_approval_policy
+21:02:53 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$499.00'}
+21:02:53 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '499.00', 'required_roles': ['Manager'], 'rule_applied': 'Cost is below $500: Manager approval only.', 'policy_version': 'v2.0.0'}
+21:02:53 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:02:55 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_requester_manager
+21:02:55 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1001', 'provided_manager_name': 'Ali Raza'}
+21:02:55 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1001', 'name': 'Sara Khan', 'job_designation': 'Marketing Analyst', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:02:55 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:02:56 [INFO] [MainThread] approval.agent: Agent step 3: model answered without tool calls. Final answer: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\nReason: Cost is below $500: Manager approval only. Policy version: v2.0.0."
+21:02:56 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\nReason: Cost is below $500: Manager approval only. Policy version: v2.0.0."
+21:02:56 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}], 'reason': 'Cost is below $500: Manager approval only. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:02:56 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:02:56 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0001 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department')]
+21:02:56 [INFO] [MainThread] approval.workflow: [REQ-0001] history: submitted by E1001 - Cost is below $500: Manager approval only. Policy version: v2.0.0.
+21:02:56 [INFO] [MainThread] approval.workflow: [REQ-0001] history: notified by system - Notified Ali Raza (E2001).
+21:03:55 [INFO] [MainThread] approval.main: Menu selection: '2'
+21:04:11 [INFO] [MainThread] approval.main: Menu selection: '5'
+21:04:35 [INFO] [MainThread] approval.main: Finance Director portal selection: 'h'
+21:04:45 [INFO] [MainThread] approval.main: Finance Director portal selection: 'b'
+21:04:48 [INFO] [MainThread] approval.main: Menu selection: '3'
+21:05:12 [INFO] [MainThread] approval.main: Manager portal selection: 'req-0001'
+21:05:22 [INFO] [MainThread] approval.main: Manager portal selection: 'h'
+21:05:38 [INFO] [MainThread] approval.main: Manager portal selection: '1'
+21:06:09 [INFO] [MainThread] approval.main: [REQ-0001] Manager decision menu selection: '1'
+21:06:09 [INFO] [MainThread] approval.workflow: [REQ-0001] decision attempt: approver=E2001 decision=APPROVED reason=None
+21:06:09 [INFO] [MainThread] approval.workflow: [REQ-0001] history: approve by E2001 - Ali Raza approved the request. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:06:09 [INFO] [MainThread] approval.workflow: [REQ-0001] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:06:13 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0001\nRequest cost: $499.00\nRequester identity: E1001\nManager name: Ali Raza\nSoftware name: VS Code\nBusiness justification: Development\nApprovers list (in approval order):\n1. Manager Marketing Department - Ali Raza (E2001): APPROVED at 2026-11-13T21:06:09\nLatest decision: APPROVED by Ali Raza (Manager Marketing Department), position 1 of 1'
+21:06:13 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:06:13 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:06:15 [INFO] [scheduler] approval.agent: Agent step 1: model decided to call 1 tool(s): lookup_requester_manager
+21:06:15 [INFO] [scheduler] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1001', 'provided_manager_name': 'Ali Raza'}
+21:06:15 [INFO] [scheduler] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1001', 'name': 'Sara Khan', 'job_designation': 'Marketing Analyst', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:06:15 [INFO] [scheduler] approval.agent: Agent step 2/6: calling model
+21:06:17 [INFO] [scheduler] approval.agent: Agent step 2: model answered without tool calls. Final answer: 'ACTION: COMPLETE\nREASON: The latest approver was the last in the list and approved the request.'
+21:06:17 [INFO] [scheduler] approval.routing: [REQ-0001] agent decided COMPLETE (The latest approver was the last in the list and approved the request.)
+21:06:17 [INFO] [scheduler] approval.workflow: [REQ-0001] history: approved by agent - All approvers approved. The latest approver was the last in the list and approved the request.
+21:06:17 [INFO] [scheduler] approval.routing: [REQ-0001] HANDOFF: budget approval complete; ready for the next workflow stage. Software installation is NOT completed by this workflow.
+21:06:17 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0001'], 'reminded': [], 'escalated': []}
+21:07:18 [INFO] [MainThread] approval.main: Manager portal selection: ''
+21:07:23 [INFO] [MainThread] approval.main: Manager portal selection: 'b'
+21:07:26 [INFO] [MainThread] approval.main: Menu selection: '3'
+21:07:37 [INFO] [MainThread] approval.main: Manager portal selection: 'h'
+21:07:43 [INFO] [MainThread] approval.main: Manager portal selection: 'b'
+21:07:50 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:09:03 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 5001.0, 'requester_identity': 'E1002', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'ALi Raza', 'policy_context': 'VS Code', 'business_justification': 'Development'}
+21:09:03 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $5,001.00\nRequester identity: E1002\nManager name: ALi Raza\nPolicy context: VS Code'
+21:09:03 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:09:03 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:09:04 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 2 tool(s): get_approval_policy, lookup_requester_manager
+21:09:04 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$5,001.00'}
+21:09:04 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '5001.00', 'required_roles': ['Manager', 'IT Lead', 'Finance Director'], 'rule_applied': 'Cost is above $2,500: Manager, then IT Lead, then Finance Director.', 'policy_version': 'v2.0.0'}
+21:09:04 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1002', 'provided_manager_name': 'ALi Raza'}
+21:09:04 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1002', 'name': 'Haseeb Ahmad', 'job_designation': 'Marketing Executive', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:09:04 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:09:06 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 2 tool(s): lookup_role_holder, lookup_role_holder
+21:09:06 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:09:06 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:09:06 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'Finance Director'}
+21:09:06 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'Finance Director', 'employee_id': 'E4001', 'name': 'Nadia Malik', 'job_designation': 'Finance Director', 'department': 'Finance'}
+21:09:06 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:09:08 [INFO] [MainThread] approval.agent: Agent step 3: model answered without tool calls. Final answer: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\n3. Job Designation: Finance Director\n   Approver's name: Nadia Malik\nReason: Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0."
+21:09:08 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\n3. Job Designation: Finance Director\n   Approver's name: Nadia Malik\nReason: Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0."
+21:09:08 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}, {'employee_id': 'E4001', 'name': 'Nadia Malik', 'job_designation': 'Finance Director'}], 'reason': 'Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:09:08 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:09:08 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0002 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department'), ('E3001', 'Omar Sheikh', 'IT Lead'), ('E4001', 'Nadia Malik', 'Finance Director')]
+21:09:08 [INFO] [MainThread] approval.workflow: [REQ-0002] history: submitted by E1002 - Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0.
+21:09:08 [INFO] [MainThread] approval.workflow: [REQ-0002] history: notified by system - Notified Ali Raza (E2001).
+21:09:12 [INFO] [MainThread] approval.main: Menu selection: '2'
+21:09:44 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:10:41 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2499.0, 'requester_identity': 'E1002', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'VS Code', 'business_justification': 'Development'}
+21:10:41 [WARNING] [MainThread] approval.submission: Step 1: Duplicate request: haseeb.ahmad@example.com already has request REQ-0002 for VS Code.
+21:11:07 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:11:56 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2499.0, 'requester_identity': 'E2001', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'IntellijIdea', 'business_justification': 'Backend Development'}
+21:11:56 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $2,499.00\nRequester identity: E2001\nManager name: Ali Raza\nPolicy context: IntellijIdea'
+21:11:56 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:11:56 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:11:58 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 2 tool(s): get_approval_policy, lookup_requester_manager
+21:11:58 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$2,499.00'}
+21:11:58 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '2499.00', 'required_roles': ['Manager', 'IT Lead'], 'rule_applied': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead.', 'policy_version': 'v2.0.0'}
+21:11:58 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E2001', 'provided_manager_name': 'Ali Raza'}
+21:11:58 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}, 'manager': {'employee_id': 'E5001', 'name': 'Zain Abbas', 'job_designation': 'Marketing Director', 'department': 'Marketing'}}
+21:11:58 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:11:59 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_role_holder
+21:11:59 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:11:59 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:11:59 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:12:00 [INFO] [MainThread] approval.agent: Agent step 3: model answered without tool calls. Final answer: "1. Job Designation: Marketing Director\n   Approver's name: Zain Abbas\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:12:00 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Marketing Director\n   Approver's name: Zain Abbas\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:12:00 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E5001', 'name': 'Zain Abbas', 'job_designation': 'Marketing Director'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}], 'reason': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:12:00 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:12:00 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0003 created with approval chain: [('E5001', 'Zain Abbas', 'Marketing Director'), ('E3001', 'Omar Sheikh', 'IT Lead')]
+21:12:00 [INFO] [MainThread] approval.workflow: [REQ-0003] history: submitted by E2001 - Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.
+21:12:00 [INFO] [MainThread] approval.workflow: [REQ-0003] history: notified by system - Notified Zain Abbas (E5001).
+21:12:37 [INFO] [MainThread] approval.main: Menu selection: '2'
+21:18:06 [INFO] [MainThread] approval.main: Application started
+21:18:06 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+21:18:21 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:19:12 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2499.0, 'requester_identity': 'E2001', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'ItellijIdea', 'business_justification': 'Development'}
+21:19:12 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $2,499.00\nRequester identity: E2001\nManager name: Ali Raza\nPolicy context: ItellijIdea'
+21:19:12 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:19:12 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:19:14 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 1 tool(s): get_approval_policy
+21:19:14 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$2,499.00'}
+21:19:14 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '2499.00', 'required_roles': ['Manager', 'IT Lead'], 'rule_applied': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead.', 'policy_version': 'v2.0.0'}
+21:19:14 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:19:15 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_requester_manager
+21:19:15 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E2001', 'provided_manager_name': 'Ali Raza'}
+21:22:11 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}, 'manager': {'employee_id': 'E5001', 'name': 'Zain Abbas', 'job_designation': 'Marketing Director', 'department': 'Marketing'}}
+21:22:11 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:22:12 [INFO] [MainThread] approval.agent: Agent step 3: model decided to call 1 tool(s): lookup_role_holder
+21:22:12 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:22:12 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:22:12 [INFO] [MainThread] approval.agent: Agent step 4/6: calling model
+21:22:14 [INFO] [MainThread] approval.agent: Agent step 4: model answered without tool calls. Final answer: "1. Job Designation: Marketing Director\n   Approver's name: Zain Abbas\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:22:14 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Marketing Director\n   Approver's name: Zain Abbas\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:22:14 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E5001', 'name': 'Zain Abbas', 'job_designation': 'Marketing Director'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}], 'reason': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:22:31 [INFO] [MainThread] approval.main: Application started
+21:22:31 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+21:23:55 [INFO] [MainThread] approval.main: Menu selection: '2'
+21:23:59 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:24:32 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2499.0, 'requester_identity': 'E2001', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'IntellijIdea', 'business_justification': 'Development'}
+21:24:32 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $2,499.00\nRequester identity: E2001\nManager name: Ali Raza\nPolicy context: IntellijIdea'
+21:24:33 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:24:33 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:24:34 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 2 tool(s): get_approval_policy, lookup_requester_manager
+21:24:34 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$2,499.00'}
+21:24:34 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '2499.00', 'required_roles': ['Manager', 'IT Lead'], 'rule_applied': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead.', 'policy_version': 'v2.0.0'}
+21:24:34 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E2001', 'provided_manager_name': 'Ali Raza'}
+21:26:24 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}, 'manager': {'employee_id': 'E5001', 'name': 'Zain Abbas', 'job_designation': 'Marketing Director', 'department': 'Marketing'}}
+21:26:24 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:26:25 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_role_holder
+21:26:25 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:26:25 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:26:25 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:26:26 [INFO] [MainThread] approval.agent: Agent step 3: model answered without tool calls. Final answer: "1. Job Designation: Marketing Director\n   Approver's name: Zain Abbas\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:26:26 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Marketing Director\n   Approver's name: Zain Abbas\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:26:26 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E5001', 'name': 'Zain Abbas', 'job_designation': 'Marketing Director'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}], 'reason': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:26:44 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:26:44 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0001 created with approval chain: [('E5001', 'Zain Abbas', 'Marketing Director'), ('E3001', 'Omar Sheikh', 'IT Lead')]
+21:26:44 [INFO] [MainThread] approval.workflow: [REQ-0001] history: submitted by E2001 - Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.
+21:26:44 [INFO] [MainThread] approval.workflow: [REQ-0001] history: notified by system - Notified Zain Abbas (E5001).
+21:26:44 [INFO] [MainThread] approval.main: Menu selection: ''
+21:27:16 [INFO] [MainThread] approval.main: Menu selection: '2'
+21:27:23 [INFO] [MainThread] approval.main: Menu selection: '3'
+21:27:27 [INFO] [MainThread] approval.main: Manager portal selection: '1'
+21:27:28 [INFO] [MainThread] approval.main: [REQ-0001] Manager decision menu selection: '1'
+21:27:28 [INFO] [MainThread] approval.workflow: [REQ-0001] decision attempt: approver=E5001 decision=APPROVED reason=None
+21:27:28 [INFO] [MainThread] approval.workflow: [REQ-0001] history: approve by E5001 - Zain Abbas approved the request. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:27:28 [INFO] [MainThread] approval.workflow: [REQ-0001] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:27:29 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0001\nRequest cost: $2,499.00\nRequester identity: E2001\nManager name: Ali Raza\nSoftware name: IntellijIdea\nBusiness justification: Development\nApprovers list (in approval order):\n1. Marketing Director - Zain Abbas (E5001): APPROVED at 2026-11-13T21:27:28\n2. IT Lead - Omar Sheikh (E3001): PENDING\nLatest decision: APPROVED by Zain Abbas (Marketing Director), position 1 of 2'
+21:27:29 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:27:29 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:27:30 [INFO] [scheduler] approval.agent: Agent step 1: model decided to call 1 tool(s): lookup_role_holder
+21:27:30 [INFO] [scheduler] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:27:30 [INFO] [scheduler] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:27:30 [INFO] [scheduler] approval.agent: Agent step 2/6: calling model
+21:27:31 [INFO] [scheduler] approval.agent: Agent step 2: model answered without tool calls. Final answer: 'ACTION: ASSIGN_NEXT\nNEXT_APPROVER: Omar Sheikh\nREASON: The next approver in the list is the IT Lead, Omar Sheikh.'
+21:27:31 [INFO] [scheduler] approval.routing: [REQ-0001] agent decided ASSIGN_NEXT (The next approver in the list is the IT Lead, Omar Sheikh.)
+21:27:31 [INFO] [scheduler] approval.workflow: [REQ-0001] history: routed by agent - Assigned next approver Omar Sheikh. The next approver in the list is the IT Lead, Omar Sheikh.
+21:27:31 [INFO] [scheduler] approval.workflow: [REQ-0001] history: notified by system - Notified Omar Sheikh (E3001).
+21:27:31 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0001'], 'reminded': [], 'escalated': []}
+21:27:44 [INFO] [MainThread] approval.main: Manager portal selection: ''
+21:27:51 [INFO] [MainThread] approval.main: Manager portal selection: 'b'
+21:27:55 [INFO] [MainThread] approval.main: Menu selection: '4'
+21:28:03 [INFO] [MainThread] approval.main: IT Lead portal selection: '1'
+21:28:05 [INFO] [MainThread] approval.main: [REQ-0001] IT Lead decision menu selection: '2'
+21:28:10 [INFO] [MainThread] approval.workflow: [REQ-0001] decision attempt: approver=E3001 decision=REJECTED reason='Not Required'
+21:28:10 [INFO] [MainThread] approval.workflow: [REQ-0001] history: reject by E3001 - Omar Sheikh rejected the request. Reason: Not Required. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:28:10 [INFO] [MainThread] approval.workflow: [REQ-0001] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:28:11 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0001\nRequest cost: $2,499.00\nRequester identity: E2001\nManager name: Ali Raza\nSoftware name: IntellijIdea\nBusiness justification: Development\nApprovers list (in approval order):\n1. Marketing Director - Zain Abbas (E5001): APPROVED at 2026-11-13T21:27:28\n2. IT Lead - Omar Sheikh (E3001): REJECTED at 2026-11-13T21:28:10 | Rejection reason: Not Required\nLatest decision: REJECTED by Omar Sheikh (IT Lead), position 2 of 2'
+21:28:11 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:28:11 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:28:12 [INFO] [scheduler] approval.agent: Agent step 1: model answered without tool calls. Final answer: 'ACTION: REJECT\nREASON: The latest decision is REJECTED by the IT Lead.'
+21:28:12 [INFO] [scheduler] approval.routing: [REQ-0001] agent decided REJECT (The latest decision is REJECTED by the IT Lead.)
+21:28:12 [INFO] [scheduler] approval.workflow: [REQ-0001] history: rejected by agent - Request rejected after decision by Omar Sheikh. Reason: Not Required. The latest decision is REJECTED by the IT Lead.
+21:28:12 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0001'], 'reminded': [], 'escalated': []}
+21:28:27 [INFO] [MainThread] approval.main: IT Lead portal selection: ''
+21:28:29 [INFO] [MainThread] approval.main: IT Lead portal selection: 'b'
+21:28:31 [INFO] [MainThread] approval.main: Menu selection: '2'
+21:29:40 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:30:19 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 499.0, 'requester_identity': 'E1001', 'requester_email': 'sara.khan@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'IntelliJIdea', 'business_justification': 'Backend Development'}
+21:30:19 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $499.00\nRequester identity: E1001\nManager name: Ali Raza\nPolicy context: IntelliJIdea'
+21:30:19 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:30:19 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:30:20 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 1 tool(s): get_approval_policy
+21:30:20 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$499.00'}
+21:30:20 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '499.00', 'required_roles': ['Manager'], 'rule_applied': 'Cost is below $500: Manager approval only.', 'policy_version': 'v2.0.0'}
+21:30:20 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:30:21 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_requester_manager
+21:30:21 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1001', 'provided_manager_name': 'Ali Raza'}
+21:30:47 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1001', 'name': 'Sara Khan', 'job_designation': 'Marketing Analyst', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:30:47 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:30:48 [INFO] [MainThread] approval.agent: Agent step 3: model answered without tool calls. Final answer: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\nReason: Cost is below $500: Manager approval only. Policy version: v2.0.0."
+21:30:48 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\nReason: Cost is below $500: Manager approval only. Policy version: v2.0.0."
+21:30:48 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}], 'reason': 'Cost is below $500: Manager approval only. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:30:48 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:30:48 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0002 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department')]
+21:30:48 [INFO] [MainThread] approval.workflow: [REQ-0002] history: submitted by E1001 - Cost is below $500: Manager approval only. Policy version: v2.0.0.
+21:30:48 [INFO] [MainThread] approval.workflow: [REQ-0002] history: notified by system - Notified Ali Raza (E2001).
+21:31:01 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:31:50 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 501.0, 'requester_identity': 'E1002', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'VS Code', 'business_justification': 'Developmet'}
+21:31:50 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $501.00\nRequester identity: E1002\nManager name: Ali Raza\nPolicy context: VS Code'
+21:31:50 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:31:50 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:31:52 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 2 tool(s): get_approval_policy, lookup_requester_manager
+21:31:52 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$501.00'}
+21:31:52 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '501.00', 'required_roles': ['Manager', 'IT Lead'], 'rule_applied': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead.', 'policy_version': 'v2.0.0'}
+21:31:52 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1002', 'provided_manager_name': 'Ali Raza'}
+21:31:52 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1002', 'name': 'Haseeb Ahmad', 'job_designation': 'Marketing Executive', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:31:52 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:31:53 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_role_holder
+21:31:53 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:31:53 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:31:53 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:31:54 [INFO] [MainThread] approval.agent: Agent step 3: model answered without tool calls. Final answer: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:31:54 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:31:54 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}], 'reason': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:31:54 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:31:54 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0003 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department'), ('E3001', 'Omar Sheikh', 'IT Lead')]
+21:31:54 [INFO] [MainThread] approval.workflow: [REQ-0003] history: submitted by E1002 - Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.
+21:31:54 [INFO] [MainThread] approval.workflow: [REQ-0003] history: notified by system - Notified Ali Raza (E2001).
+21:32:15 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:33:21 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 500.0, 'requester_identity': 'E1001', 'requester_email': 'sara.khan@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'Docker', 'business_justification': 'Containerization'}
+21:33:21 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $500.00\nRequester identity: E1001\nManager name: Ali Raza\nPolicy context: Docker'
+21:33:21 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:33:21 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:33:24 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 2 tool(s): get_approval_policy, lookup_requester_manager
+21:33:24 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$500.00'}
+21:33:24 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '500.00', 'required_roles': ['Manager', 'IT Lead'], 'rule_applied': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead.', 'policy_version': 'v2.0.0'}
+21:33:24 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1001', 'provided_manager_name': 'Ali Raza'}
+21:33:24 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1001', 'name': 'Sara Khan', 'job_designation': 'Marketing Analyst', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:33:24 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:33:25 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_role_holder
+21:33:25 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:33:25 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:33:25 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:33:26 [INFO] [MainThread] approval.agent: Agent step 3: model answered without tool calls. Final answer: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:33:26 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:33:26 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}], 'reason': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:33:26 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:33:26 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0004 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department'), ('E3001', 'Omar Sheikh', 'IT Lead')]
+21:33:26 [INFO] [MainThread] approval.workflow: [REQ-0004] history: submitted by E1001 - Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.
+21:33:26 [INFO] [MainThread] approval.workflow: [REQ-0004] history: notified by system - Notified Ali Raza (E2001).
+21:35:39 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:36:51 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2499.0, 'requester_identity': 'E1002', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'Brave Browser', 'business_justification': 'Secure Web Searching'}
+21:36:51 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $2,499.00\nRequester identity: E1002\nManager name: Ali Raza\nPolicy context: Brave Browser'
+21:36:51 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:36:51 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:36:53 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 1 tool(s): get_approval_policy
+21:36:53 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$2,499.00'}
+21:36:53 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '2499.00', 'required_roles': ['Manager', 'IT Lead'], 'rule_applied': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead.', 'policy_version': 'v2.0.0'}
+21:36:53 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:36:54 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_requester_manager
+21:36:54 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1002', 'provided_manager_name': 'Ali Raza'}
+21:36:54 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1002', 'name': 'Haseeb Ahmad', 'job_designation': 'Marketing Executive', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:36:54 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:36:55 [INFO] [MainThread] approval.agent: Agent step 3: model decided to call 1 tool(s): lookup_role_holder
+21:36:55 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:36:55 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:36:55 [INFO] [MainThread] approval.agent: Agent step 4/6: calling model
+21:36:56 [INFO] [MainThread] approval.agent: Agent step 4: model answered without tool calls. Final answer: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:36:56 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\nReason: Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0."
+21:36:56 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}], 'reason': 'Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:36:56 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:36:56 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0005 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department'), ('E3001', 'Omar Sheikh', 'IT Lead')]
+21:36:56 [INFO] [MainThread] approval.workflow: [REQ-0005] history: submitted by E1002 - Cost is from $500 to $2,500 inclusive: Manager, then IT Lead. Policy version: v2.0.0.
+21:36:56 [INFO] [MainThread] approval.workflow: [REQ-0005] history: notified by system - Notified Ali Raza (E2001).
+21:37:06 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:38:01 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2501.0, 'requester_identity': 'E1002', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'Postman', 'business_justification': 'Testing'}
+21:38:01 [INFO] [MainThread] approval.agent: Agent invoked with user message: 'Request cost: $2,501.00\nRequester identity: E1002\nManager name: Ali Raza\nPolicy context: Postman'
+21:38:01 [INFO] [MainThread] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:38:01 [INFO] [MainThread] approval.agent: Agent step 1/6: calling model
+21:38:02 [INFO] [MainThread] approval.agent: Agent step 1: model decided to call 1 tool(s): get_approval_policy
+21:38:02 [INFO] [MainThread] approval.agent: Tool call: get_approval_policy args={'request_cost': '$2,501.00'}
+21:38:02 [INFO] [MainThread] approval.agent: Tool result: get_approval_policy -> {'valid': True, 'cost_used': '2501.00', 'required_roles': ['Manager', 'IT Lead', 'Finance Director'], 'rule_applied': 'Cost is above $2,500: Manager, then IT Lead, then Finance Director.', 'policy_version': 'v2.0.0'}
+21:38:02 [INFO] [MainThread] approval.agent: Agent step 2/6: calling model
+21:38:02 [INFO] [MainThread] approval.agent: Agent step 2: model decided to call 1 tool(s): lookup_requester_manager
+21:38:02 [INFO] [MainThread] approval.agent: Tool call: lookup_requester_manager args={'requester_identity': 'E1002', 'provided_manager_name': 'Ali Raza'}
+21:38:02 [INFO] [MainThread] approval.agent: Tool result: lookup_requester_manager -> {'found': True, 'requester': {'employee_id': 'E1002', 'name': 'Haseeb Ahmad', 'job_designation': 'Marketing Executive', 'department': 'Marketing'}, 'manager': {'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department', 'department': 'Marketing'}}
+21:38:02 [INFO] [MainThread] approval.agent: Agent step 3/6: calling model
+21:38:04 [INFO] [MainThread] approval.agent: Agent step 3: model decided to call 2 tool(s): lookup_role_holder, lookup_role_holder
+21:38:04 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:38:04 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:38:04 [INFO] [MainThread] approval.agent: Tool call: lookup_role_holder args={'role': 'Finance Director'}
+21:38:04 [INFO] [MainThread] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'Finance Director', 'employee_id': 'E4001', 'name': 'Nadia Malik', 'job_designation': 'Finance Director', 'department': 'Finance'}
+21:38:04 [INFO] [MainThread] approval.agent: Agent step 4/6: calling model
+21:38:05 [INFO] [MainThread] approval.agent: Agent step 4: model answered without tool calls. Final answer: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\n3. Job Designation: Finance Director\n   Approver's name: Nadia Malik\nReason: Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0."
+21:38:05 [INFO] [MainThread] approval.submission: Step 2: agent returned output: "1. Job Designation: Manager Marketing Department\n   Approver's name: Ali Raza\n2. Job Designation: IT Lead\n   Approver's name: Omar Sheikh\n3. Job Designation: Finance Director\n   Approver's name: Nadia Malik\nReason: Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0."
+21:38:05 [INFO] [MainThread] approval.submission: Step 3: parsed agent output: {'approvers': [{'employee_id': 'E2001', 'name': 'Ali Raza', 'job_designation': 'Manager Marketing Department'}, {'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead'}, {'employee_id': 'E4001', 'name': 'Nadia Malik', 'job_designation': 'Finance Director'}], 'reason': 'Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0.', 'policy_version': 'v2.0.0', 'error': None}
+21:38:05 [INFO] [MainThread] approval.submission: Step 4: validation passed
+21:38:05 [INFO] [MainThread] approval.submission: Step 5: workflow REQ-0006 created with approval chain: [('E2001', 'Ali Raza', 'Manager Marketing Department'), ('E3001', 'Omar Sheikh', 'IT Lead'), ('E4001', 'Nadia Malik', 'Finance Director')]
+21:38:05 [INFO] [MainThread] approval.workflow: [REQ-0006] history: submitted by E1002 - Cost is above $2,500: Manager, then IT Lead, then Finance Director. Policy version: v2.0.0.
+21:38:05 [INFO] [MainThread] approval.workflow: [REQ-0006] history: notified by system - Notified Ali Raza (E2001).
+21:38:13 [INFO] [MainThread] approval.main: Menu selection: '2'
+21:38:21 [INFO] [MainThread] approval.main: Menu selection: '1'
+21:40:44 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2501.0, 'requester_identity': 'E1002', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'postman', 'business_justification': 'Testing'}
+21:40:44 [WARNING] [MainThread] approval.submission: Step 1: Duplicate request: haseeb.ahmad@example.com already has request REQ-0006 for postman.
+21:40:56 [INFO] [MainThread] approval.main: Menu selection: '5'
+21:41:19 [INFO] [MainThread] approval.main: Finance Director portal selection: 'b'
+21:41:21 [INFO] [MainThread] approval.main: Menu selection: '5'
+21:41:24 [INFO] [MainThread] approval.main: Finance Director portal selection: 'b'
+21:41:27 [INFO] [MainThread] approval.main: Menu selection: '4'
+21:41:33 [INFO] [MainThread] approval.main: IT Lead portal selection: 'b'
+21:41:36 [INFO] [MainThread] approval.main: Menu selection: '3'
+21:41:46 [INFO] [MainThread] approval.main: Manager portal selection: '1'
+21:41:53 [INFO] [MainThread] approval.main: [REQ-0002] Manager decision menu selection: '2'
+21:41:58 [INFO] [MainThread] approval.workflow: [REQ-0002] decision attempt: approver=E2001 decision=REJECTED reason="Don't like it"
+21:41:58 [INFO] [MainThread] approval.workflow: [REQ-0002] history: reject by E2001 - Ali Raza rejected the request. Reason: Don't like it. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:41:58 [INFO] [MainThread] approval.workflow: [REQ-0002] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:41:59 [INFO] [scheduler] approval.agent: Agent invoked with user message: "Request ID: REQ-0002\nRequest cost: $499.00\nRequester identity: E1001\nManager name: Ali Raza\nSoftware name: IntelliJIdea\nBusiness justification: Backend Development\nApprovers list (in approval order):\n1. Manager Marketing Department - Ali Raza (E2001): REJECTED at 2026-11-13T21:41:58 | Rejection reason: Don't like it\nLatest decision: REJECTED by Ali Raza (Manager Marketing Department), position 1 of 1"
+21:41:59 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:41:59 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:42:01 [INFO] [scheduler] approval.agent: Agent step 1: model answered without tool calls. Final answer: 'ACTION: REJECT  \nREASON: The latest decision is REJECTED.'
+21:42:01 [INFO] [scheduler] approval.routing: [REQ-0002] agent decided REJECT (The latest decision is REJECTED.)
+21:42:01 [INFO] [scheduler] approval.workflow: [REQ-0002] history: rejected by agent - Request rejected after decision by Ali Raza. Reason: Don't like it. The latest decision is REJECTED.
+21:42:01 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0002'], 'reminded': [], 'escalated': []}
+21:42:04 [INFO] [MainThread] approval.main: Manager portal selection: ''
+21:42:12 [INFO] [MainThread] approval.main: Manager portal selection: '4'
+21:42:14 [INFO] [MainThread] approval.main: [REQ-0006] Manager decision menu selection: '1'
+21:42:14 [INFO] [MainThread] approval.workflow: [REQ-0006] decision attempt: approver=E2001 decision=APPROVED reason=None
+21:42:14 [INFO] [MainThread] approval.workflow: [REQ-0006] history: approve by E2001 - Ali Raza approved the request. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:42:14 [INFO] [MainThread] approval.workflow: [REQ-0006] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:42:16 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0006\nRequest cost: $2,501.00\nRequester identity: E1002\nManager name: Ali Raza\nSoftware name: Postman\nBusiness justification: Testing\nApprovers list (in approval order):\n1. Manager Marketing Department - Ali Raza (E2001): APPROVED at 2026-11-13T21:42:14\n2. IT Lead - Omar Sheikh (E3001): PENDING\n3. Finance Director - Nadia Malik (E4001): PENDING\nLatest decision: APPROVED by Ali Raza (Manager Marketing Department), position 1 of 3'
+21:42:16 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:42:16 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:42:17 [INFO] [scheduler] approval.agent: Agent step 1: model decided to call 2 tool(s): lookup_role_holder, lookup_role_holder
+21:42:17 [INFO] [scheduler] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:42:17 [INFO] [scheduler] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:42:17 [INFO] [scheduler] approval.agent: Tool call: lookup_role_holder args={'role': 'Finance Director'}
+21:42:17 [INFO] [scheduler] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'Finance Director', 'employee_id': 'E4001', 'name': 'Nadia Malik', 'job_designation': 'Finance Director', 'department': 'Finance'}
+21:42:17 [INFO] [scheduler] approval.agent: Agent step 2/6: calling model
+21:42:18 [INFO] [scheduler] approval.agent: Agent step 2: model answered without tool calls. Final answer: 'ACTION: ASSIGN_NEXT\nNEXT_APPROVER: Omar Sheikh\nREASON: The next approver in the list is the IT Lead, Omar Sheikh.'
+21:42:18 [INFO] [scheduler] approval.routing: [REQ-0006] agent decided ASSIGN_NEXT (The next approver in the list is the IT Lead, Omar Sheikh.)
+21:42:18 [INFO] [scheduler] approval.workflow: [REQ-0006] history: routed by agent - Assigned next approver Omar Sheikh. The next approver in the list is the IT Lead, Omar Sheikh.
+21:42:18 [INFO] [scheduler] approval.workflow: [REQ-0006] history: notified by system - Notified Omar Sheikh (E3001).
+21:42:18 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0006'], 'reminded': [], 'escalated': []}
+21:42:25 [INFO] [MainThread] approval.main: Manager portal selection: 'b'
+21:42:32 [INFO] [MainThread] approval.main: Menu selection: '3'
+21:42:37 [INFO] [MainThread] approval.main: Manager portal selection: '2'
+21:42:38 [INFO] [MainThread] approval.main: [REQ-0004] Manager decision menu selection: '1'
+21:42:38 [INFO] [MainThread] approval.workflow: [REQ-0004] decision attempt: approver=E2001 decision=APPROVED reason=None
+21:42:38 [INFO] [MainThread] approval.workflow: [REQ-0004] history: approve by E2001 - Ali Raza approved the request. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:42:38 [INFO] [MainThread] approval.workflow: [REQ-0004] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:42:38 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0004\nRequest cost: $500.00\nRequester identity: E1001\nManager name: Ali Raza\nSoftware name: Docker\nBusiness justification: Containerization\nApprovers list (in approval order):\n1. Manager Marketing Department - Ali Raza (E2001): APPROVED at 2026-11-13T21:42:38\n2. IT Lead - Omar Sheikh (E3001): PENDING\nLatest decision: APPROVED by Ali Raza (Manager Marketing Department), position 1 of 2'
+21:42:38 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:42:38 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:42:39 [INFO] [scheduler] approval.agent: Agent step 1: model decided to call 1 tool(s): lookup_role_holder
+21:42:39 [INFO] [scheduler] approval.agent: Tool call: lookup_role_holder args={'role': 'IT Lead'}
+21:42:39 [INFO] [scheduler] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'IT Lead', 'employee_id': 'E3001', 'name': 'Omar Sheikh', 'job_designation': 'IT Lead', 'department': 'IT'}
+21:42:39 [INFO] [scheduler] approval.agent: Agent step 2/6: calling model
+21:42:41 [INFO] [scheduler] approval.agent: Agent step 2: model answered without tool calls. Final answer: 'ACTION: ASSIGN_NEXT\nNEXT_APPROVER: Omar Sheikh\nREASON: The next approver, IT Lead Omar Sheikh, matches the approvers list.'
+21:42:41 [INFO] [scheduler] approval.routing: [REQ-0004] agent decided ASSIGN_NEXT (The next approver, IT Lead Omar Sheikh, matches the approvers list.)
+21:42:41 [INFO] [scheduler] approval.workflow: [REQ-0004] history: routed by agent - Assigned next approver Omar Sheikh. The next approver, IT Lead Omar Sheikh, matches the approvers list.
+21:42:41 [INFO] [scheduler] approval.workflow: [REQ-0004] history: notified by system - Notified Omar Sheikh (E3001).
+21:42:41 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0004'], 'reminded': [], 'escalated': []}
+21:42:45 [INFO] [MainThread] approval.main: Manager portal selection: ''
+21:42:48 [INFO] [MainThread] approval.main: Manager portal selection: 'b'
+21:42:53 [INFO] [MainThread] approval.main: Menu selection: '4'
+21:43:02 [INFO] [MainThread] approval.main: IT Lead portal selection: '1'
+21:43:03 [INFO] [MainThread] approval.main: [REQ-0004] IT Lead decision menu selection: '1'
+21:43:03 [INFO] [MainThread] approval.workflow: [REQ-0004] decision attempt: approver=E3001 decision=APPROVED reason=None
+21:43:03 [INFO] [MainThread] approval.workflow: [REQ-0004] history: approve by E3001 - Omar Sheikh approved the request. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:43:03 [INFO] [MainThread] approval.workflow: [REQ-0004] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:43:06 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0004\nRequest cost: $500.00\nRequester identity: E1001\nManager name: Ali Raza\nSoftware name: Docker\nBusiness justification: Containerization\nApprovers list (in approval order):\n1. Manager Marketing Department - Ali Raza (E2001): APPROVED at 2026-11-13T21:42:38\n2. IT Lead - Omar Sheikh (E3001): APPROVED at 2026-11-13T21:43:03\nLatest decision: APPROVED by Omar Sheikh (IT Lead), position 2 of 2'
+21:43:06 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:43:06 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:43:07 [INFO] [scheduler] approval.agent: Agent step 1: model answered without tool calls. Final answer: 'ACTION: COMPLETE  \nREASON: All approvers in the list have approved the request.'
+21:43:07 [INFO] [scheduler] approval.routing: [REQ-0004] agent decided COMPLETE (All approvers in the list have approved the request.)
+21:43:07 [INFO] [scheduler] approval.workflow: [REQ-0004] history: approved by agent - All approvers approved. All approvers in the list have approved the request.
+21:43:07 [INFO] [scheduler] approval.routing: [REQ-0004] HANDOFF: budget approval complete; ready for the next workflow stage. Software installation is NOT completed by this workflow.
+21:43:07 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0004'], 'reminded': [], 'escalated': []}
+21:43:27 [INFO] [MainThread] approval.main: IT Lead portal selection: ''
+21:43:31 [INFO] [MainThread] approval.main: IT Lead portal selection: '1'
+21:43:33 [INFO] [MainThread] approval.main: [REQ-0006] IT Lead decision menu selection: '1'
+21:43:33 [INFO] [MainThread] approval.workflow: [REQ-0006] decision attempt: approver=E3001 decision=APPROVED reason=None
+21:43:33 [INFO] [MainThread] approval.workflow: [REQ-0006] history: approve by E3001 - Omar Sheikh approved the request. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:43:33 [INFO] [MainThread] approval.workflow: [REQ-0006] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:43:37 [INFO] [MainThread] approval.main: IT Lead portal selection: 'b'
+21:43:37 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0006\nRequest cost: $2,501.00\nRequester identity: E1002\nManager name: Ali Raza\nSoftware name: Postman\nBusiness justification: Testing\nApprovers list (in approval order):\n1. Manager Marketing Department - Ali Raza (E2001): APPROVED at 2026-11-13T21:42:14\n2. IT Lead - Omar Sheikh (E3001): APPROVED at 2026-11-13T21:43:33\n3. Finance Director - Nadia Malik (E4001): PENDING\nLatest decision: APPROVED by Omar Sheikh (IT Lead), position 2 of 3'
+21:43:37 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:43:37 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:43:38 [INFO] [scheduler] approval.agent: Agent step 1: model decided to call 1 tool(s): lookup_role_holder
+21:43:38 [INFO] [scheduler] approval.agent: Tool call: lookup_role_holder args={'role': 'Finance Director'}
+21:43:38 [INFO] [scheduler] approval.agent: Tool result: lookup_role_holder -> {'found': True, 'role': 'Finance Director', 'employee_id': 'E4001', 'name': 'Nadia Malik', 'job_designation': 'Finance Director', 'department': 'Finance'}
+21:43:38 [INFO] [scheduler] approval.agent: Agent step 2/6: calling model
+21:43:39 [INFO] [scheduler] approval.agent: Agent step 2: model answered without tool calls. Final answer: 'ACTION: ASSIGN_NEXT\nNEXT_APPROVER: Nadia Malik\nREASON: The next approver, Finance Director Nadia Malik, matches the approvers list.'
+21:43:39 [INFO] [scheduler] approval.routing: [REQ-0006] agent decided ASSIGN_NEXT (The next approver, Finance Director Nadia Malik, matches the approvers list.)
+21:43:39 [INFO] [scheduler] approval.workflow: [REQ-0006] history: routed by agent - Assigned next approver Nadia Malik. The next approver, Finance Director Nadia Malik, matches the approvers list.
+21:43:39 [INFO] [scheduler] approval.workflow: [REQ-0006] history: notified by system - Notified Nadia Malik (E4001).
+21:43:39 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0006'], 'reminded': [], 'escalated': []}
+21:43:48 [INFO] [MainThread] approval.main: Menu selection: ''
+21:43:57 [INFO] [MainThread] approval.main: Menu selection: '5'
+21:44:00 [INFO] [MainThread] approval.main: Finance Director portal selection: '1'
+21:44:04 [INFO] [MainThread] approval.main: [REQ-0006] Finance Director decision menu selection: '1'
+21:44:04 [INFO] [MainThread] approval.workflow: [REQ-0006] decision attempt: approver=E4001 decision=APPROVED reason=None
+21:44:04 [INFO] [MainThread] approval.workflow: [REQ-0006] history: approve by E4001 - Nadia Malik approved the request. Resulting state: pending: decision recorded, awaiting Agent routing.
+21:44:04 [INFO] [MainThread] approval.workflow: [REQ-0006] decision result: success=True message=Decision recorded; awaiting Agent routing on the next scheduler pass.
+21:44:04 [INFO] [scheduler] approval.agent: Agent invoked with user message: 'Request ID: REQ-0006\nRequest cost: $2,501.00\nRequester identity: E1002\nManager name: Ali Raza\nSoftware name: Postman\nBusiness justification: Testing\nApprovers list (in approval order):\n1. Manager Marketing Department - Ali Raza (E2001): APPROVED at 2026-11-13T21:42:14\n2. IT Lead - Omar Sheikh (E3001): APPROVED at 2026-11-13T21:43:33\n3. Finance Director - Nadia Malik (E4001): APPROVED at 2026-11-13T21:44:04\nLatest decision: APPROVED by Nadia Malik (Finance Director), position 3 of 3'
+21:44:04 [INFO] [scheduler] approval.agent: Agent tools available: get_approval_policy, lookup_requester_manager, lookup_role_holder
+21:44:04 [INFO] [scheduler] approval.agent: Agent step 1/6: calling model
+21:44:06 [INFO] [scheduler] approval.agent: Agent step 1: model answered without tool calls. Final answer: 'ACTION: COMPLETE  \nREASON: All approvers have approved the request.'
+21:44:06 [INFO] [scheduler] approval.routing: [REQ-0006] agent decided COMPLETE (All approvers have approved the request.)
+21:44:06 [INFO] [scheduler] approval.workflow: [REQ-0006] history: approved by agent - All approvers approved. All approvers have approved the request.
+21:44:06 [INFO] [scheduler] approval.routing: [REQ-0006] HANDOFF: budget approval complete; ready for the next workflow stage. Software installation is NOT completed by this workflow.
+21:44:06 [INFO] [scheduler] approval.scheduler: Scheduler cycle summary: {'processed': ['REQ-0006'], 'reminded': [], 'escalated': []}
+21:44:12 [INFO] [MainThread] approval.main: Finance Director portal selection: ''
+21:44:14 [INFO] [MainThread] approval.main: Finance Director portal selection: 'b'
+21:44:16 [INFO] [MainThread] approval.main: Menu selection: '2'

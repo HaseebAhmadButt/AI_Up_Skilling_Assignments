@@ -8,7 +8,8 @@ from mock_data import send_notification
 from tools._shared import normalize
 from .store import update_workflow
 from .submission import TOOLS, TOOL_MAP
-from .workflow_tools import REJECTED, add_history, current_step, has_unrouted_decision, notify_approver
+from .workflow_tools import (APPROVED, REJECTED, add_history, current_step, has_unrouted_decision, notify_approver,
+                             requester_id_of)
 
 log = logging.getLogger("approval.routing")
 MAX_ROUTING_ATTEMPTS = 3  # failed or invalid agent answers tolerated before the request is escalated
@@ -29,14 +30,17 @@ def build_routing_message(workflow):
         "Approvers list (in approval order):",
     ]
     for i, step in enumerate(chain, 1):
-        line = f"{i}. {step['job_designation']} - {step['name']} ({step['employee_id']}): {step['decision'] or 'PENDING'}"
+        # Stage 1 is labelled "Manager", the role name the policy and the portals use (not the directory title).
+        role = "Manager" if i == 1 else step["job_designation"]
+        line = f"{i}. {role} - {step['name']} ({step['employee_id']}): {step['decision'] or 'PENDING'}"
         if step.get("decided_at"):
             line += f" at {step['decided_at']}"
         if step.get("reason"):
             line += f" | Rejection reason: {step['reason']}"
         lines.append(line)
     step = chain[index]
-    lines.append(f"Latest decision: {step['decision']} by {step['name']} ({step['job_designation']}), "
+    role = "Manager" if index == 0 else step["job_designation"]
+    lines.append(f"Latest decision: {step['decision']} by {step['name']} ({role}), "
                  f"position {index + 1} of {len(chain)}")
     return "\n".join(lines)
 
@@ -49,10 +53,12 @@ def default_next_step_fn(workflow):
 
 
 def parse_routing_output(text):
-    action = re.search(r"ACTION:\s*(ASSIGN_NEXT|COMPLETE|REJECT|BLOCK)\b", text or "")
-    approver = re.search(r"NEXT_APPROVER:\s*(.+)", text or "")
-    reason = re.search(r"REASON:\s*(.+)", text or "")
-    return {"action": action.group(1) if action else None,
+    text = text if isinstance(text, str) else ""
+    # Tolerates trailing spaces and case differences. More than one distinct ACTION line is ambiguous -> None.
+    actions = {a.upper() for a in re.findall(r"ACTION:\s*(ASSIGN_NEXT|COMPLETE|REJECT|BLOCK)\b", text, re.I)}
+    approver = re.search(r"NEXT_APPROVER:[ \t]*(.+)", text, re.I)
+    reason = re.search(r"REASON:[ \t]*(.+)", text, re.I)
+    return {"action": actions.pop() if len(actions) == 1 else None,
             "next_approver": approver.group(1).strip() if approver else None,
             "reason": reason.group(1).strip() if reason else ""}
 
@@ -71,10 +77,19 @@ def routing_error(workflow, result):
         return "Agent answered REJECT but the latest decision was not a rejection."
     if action == "BLOCK":
         return None
+    # The agent may only advance or complete on recorded approvals, never on its own say-so.
+    if chain[index]["decision"] != APPROVED or any(s["decision"] != APPROVED for s in chain[:index]):
+        return f"Agent answered {action} but not every earlier approver has APPROVED."
     if index + 1 >= len(chain):
-        return None if action == "COMPLETE" else f"Agent answered {action} after the last approver; it must complete."
+        if action != "COMPLETE":
+            return f"Agent answered {action} after the last approver; it must complete."
+        return None  # every approver in the chain is APPROVED (checked above)
     if action != "ASSIGN_NEXT":
         return f"Agent answered {action} but another approver is still required."
+    if chain[index + 1]["decision"] is not None:
+        return f"Next approver {chain[index + 1]['name']!r} already has a decision; it is not pending."
+    if chain[index + 1]["employee_id"] == requester_id_of(workflow):
+        return "Next approver is the requester; self-approval is never allowed."
     if normalize(result["next_approver"] or "") != normalize(chain[index + 1]["name"]):
         return f"Agent chose {result['next_approver']!r}, but the next approver in the list is {chain[index + 1]['name']!r}."
     return None
