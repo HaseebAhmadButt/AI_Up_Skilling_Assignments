@@ -1,6 +1,9 @@
 """Run from L2: python -m unittest tests.test_workflow -v  (no API key needed; the agent is stubbed)."""
+import io
 import itertools
 import unittest
+from contextlib import redirect_stdout
+from unittest.mock import patch
 
 from mock_data import clear_notifications, get_employee, sent_notifications
 from tools import get_approval_policy, lookup_requester_manager, lookup_role_holder
@@ -9,7 +12,8 @@ from workflow.scheduler import process_workflows
 from workflow.store import approval_workflows, clear_workflows, create_workflow
 from workflow.submission import submit_request
 from workflow.validation import validate_agent_result
-from workflow.workflow_tools import REJECTED_MESSAGE, current_step, submit_decision
+from workflow.workflow_tools import (REASON_TOO_SHORT_MESSAGE, REJECTED_MESSAGE, current_step, is_meaningful_reason,
+                                     submit_decision)
 
 
 def fake_agent(request):
@@ -107,6 +111,32 @@ class WorkflowTests(unittest.TestCase):
         self.decide(rid, "REJECTED", reason="Too expensive")
         self.assertEqual(approval_workflows[rid]["status"], "rejected")
         self.assertFalse(self.decide(rid, "APPROVED", approver_id="E4001")["success"])
+
+    def test_is_meaningful_reason(self):
+        for good in ("Too expensive", "  Budget exceeded for Q4  "):
+            self.assertTrue(is_meaningful_reason(good), good)
+        for bad in (None, "", "   ", "no", "Rejected", "a b c", 123):
+            self.assertFalse(is_meaningful_reason(bad), bad)
+
+    def test_rejection_with_meaningless_reason_is_refused(self):
+        rid = self.submit(400)["request_id"]
+        for bad in (None, "", "no", "Rejected"):
+            result = self.decide(rid, "REJECTED", reason=bad)
+            self.assertFalse(result["success"])
+            self.assertEqual(result["message"], REASON_TOO_SHORT_MESSAGE)
+        self.assertEqual(approval_workflows[rid]["status"], "pending")
+
+    def test_portal_reprompts_until_reason_is_meaningful(self):
+        import main
+        rid = self.submit(400)["request_id"]
+        answers = iter(["2", "no", "Rejected", "Too expensive for budget"])
+        out = io.StringIO()
+        with patch("builtins.input", lambda _prompt="": next(answers)), redirect_stdout(out):
+            main.decide(approval_workflows[rid], "Manager")
+        self.assertEqual(out.getvalue().count(REASON_TOO_SHORT_MESSAGE), 2)
+        step = approval_workflows[rid]["approval_chain"][0]
+        self.assertEqual(step["decision"], "REJECTED")
+        self.assertEqual(step["reason"], "Too expensive for budget")
 
     def test_invalid_results_not_stored(self):
         self.assertFalse(self.submit(-5)["success"])

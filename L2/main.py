@@ -10,7 +10,8 @@ from workflow.scheduler import process_workflows
 from workflow.store import approval_workflows, lock
 from workflow.submission import EMAIL_PATTERN, submit_request
 from workflow.validation import requester_id_from
-from workflow.workflow_tools import REJECTED_MESSAGE, current_step, is_rejected, submit_decision
+from workflow.workflow_tools import (REASON_TOO_SHORT_MESSAGE, REJECTED_MESSAGE, current_step, is_meaningful_reason,
+                                     is_rejected, submit_decision)
 
 SCHEDULER_INTERVAL_SECONDS = 5
 log = logging.getLogger("approval.main")
@@ -265,6 +266,9 @@ def decide(workflow, role):
         reason = None
         if choice == "2":
             reason = read_required("Rejection reason: ")
+            while not is_meaningful_reason(reason):
+                print(REASON_TOO_SHORT_MESSAGE)
+                reason = read_required("Rejection reason: ")
         with lock:
             error = actionable_error(workflow, role)
             if error:

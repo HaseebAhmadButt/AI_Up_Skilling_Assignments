@@ -473,3 +473,11 @@ openai.OpenAIError: Missing credentials. Please pass an `api_key`, `workload_ide
 21:44:12 [INFO] [MainThread] approval.main: Finance Director portal selection: ''
 21:44:14 [INFO] [MainThread] approval.main: Finance Director portal selection: 'b'
 21:44:16 [INFO] [MainThread] approval.main: Menu selection: '2'
+00:18:22 [INFO] [MainThread] approval.main: Application started
+00:18:22 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+00:18:25 [INFO] [MainThread] approval.main: Menu selection: '1'
+00:19:32 [INFO] [MainThread] approval.main: Application started
+00:19:32 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+00:19:35 [INFO] [MainThread] approval.main: Menu selection: '1'
+00:20:02 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': 2499.0, 'requester_identity': 'E1001', 'requester_email': 'haseeb.ahmad@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'IntellijIdea', 'business_justification': 'Development'}
+00:20:02 [WARNING] [MainThread] approval.submission: Step 1: identity mismatch: E1001 is Sara Khan (sara.khan@example.com), not haseeb.ahmad@example.com
