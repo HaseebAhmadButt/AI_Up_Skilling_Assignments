@@ -1,0 +1,21 @@
+{
+  "status": "not_run_runtime_unavailable",
+  "case_count": 16,
+  "baseline_configuration": "Chroma top_k=1",
+  "revised_configuration": "Chroma top_k=6",
+  "improvement": "Retrieve up to six current policy sections to improve paraphrase recall and cross-document coverage.",
+  "baseline_metrics": null,
+  "revised_metrics": null,
+  "blockers": [
+    "The project virtual environment does not have the chromadb package installed.",
+    "No Chroma server is reachable at localhost:8000.",
+    "OPENAI_API_KEY is not configured in this environment."
+  ],
+  "manual_citation_review": {
+    "case_id": "P04",
+    "citation": "Approval Lifecycle, Rejection, and Escalation Controls, l3-prototype-1, §1 — Explicit decisions and completion",
+    "checked_against": "policy_documents/approval_lifecycle_controls_l3-prototype-1.md §1",
+    "finding": "The section explicitly says silence, timeout, reminder, or agent response does not count as approval."
+  },
+  "rerun": "From L3, start Chroma, install ../requirements.txt, configure OPENAI_API_KEY, and run ../.venv/bin/python -m policy.evaluate."
+}

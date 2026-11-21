@@ -1,0 +1,30 @@
+23:14:50 [INFO] [MainThread] approval.main: Application started
+23:14:50 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+23:15:11 [INFO] [MainThread] approval.main: Menu selection: '9'
+23:15:31 [INFO] [MainThread] approval.main: Menu selection: '7'
+23:15:36 [INFO] [MainThread] approval.main: Menu selection: 'clear'
+23:15:42 [INFO] [MainThread] approval.main: Menu selection: '10'
+23:15:42 [INFO] [MainThread] approval.main: Application stopped
+23:15:48 [INFO] [MainThread] approval.main: Application started
+23:15:48 [INFO] [scheduler] approval.main: Scheduler started (interval 5s)
+23:15:56 [INFO] [MainThread] approval.main: Menu selection: '6'
+23:15:56 [INFO] [MainThread] approval.submission: Step 1: submitting request: {'request_cost': '$400', 'requester_identity': 'E1001', 'requester_email': 'sara.khan@example.com', 'manager_name': 'Ali Raza', 'policy_context': 'Figma', 'business_justification': 'Need Figma for design reviews', 'cost_currency': 'USD', 'device_id': 'DEV-E1001-01', 'requested_version': None, 'license_details': None}
+23:15:56 [ERROR] [MainThread] approval.submission: Request REQ-0001 stopped because Chroma policy retrieval failed
+Traceback (most recent call last):
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/L3/policy/retrieval.py", line 36, in retrieve_approval_policy
+    import chromadb
+ModuleNotFoundError: No module named 'chromadb'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/L3/workflow/submission.py", line 129, in submit_request
+    retrieved_policy = retrieve_approval_policy(raw_cost)
+  File "/Users/hbutt/Desktop/Personal/AI Up-skilling/L3/policy/retrieval.py", line 62, in retrieve_approval_policy
+    raise PolicyRetrievalError(
+        "Could not retrieve the approval policy from ChromaDB; request routing stopped with no local fallback."
+    ) from exc
+policy.retrieval.PolicyRetrievalError: Could not retrieve the approval policy from ChromaDB; request routing stopped with no local fallback.
+23:16:18 [INFO] [MainThread] approval.main: Menu selection: '10'
+23:16:18 [INFO] [MainThread] approval.main: Application stopped
+23:16:18 [INFO] [scheduler] approval.main: Scheduler stopped

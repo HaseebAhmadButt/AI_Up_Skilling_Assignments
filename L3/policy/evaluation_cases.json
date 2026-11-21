@@ -1,0 +1,18 @@
+[
+  {"id":"P01","question":"Who approves a software request costing $400?","answerable":true,"expected_facts":["manager"],"expected_sources":["software-request-approval:2"]},
+  {"id":"P02","question":"For a $1,800 software purchase, which roles decide and in what order?","answerable":true,"expected_facts":["manager","it lead","order"],"expected_sources":["software-request-approval:2"]},
+  {"id":"P03","question":"What is the approval route for software costing $3,000?","answerable":true,"expected_facts":["manager","it lead","finance director"],"expected_sources":["software-request-approval:2"]},
+  {"id":"P04","question":"If an approver stays silent, can the request move forward?","answerable":true,"expected_facts":["silence","approval"],"expected_sources":["approval-lifecycle-controls:1"]},
+  {"id":"P05","question":"How long before reminders, and how many are sent before escalation?","answerable":true,"expected_facts":["24 hours","two reminders","escalation"],"expected_sources":["approval-lifecycle-controls:3"]},
+  {"id":"P06","question":"Can a later approver decide before the assigned approver?","answerable":true,"expected_facts":["currently assigned","in order"],"expected_sources":["identity-and-approver-authorization:4"]},
+  {"id":"P07","question":"Which employee email may be used for a request?","answerable":true,"expected_facts":["email","employee directory","match"],"expected_sources":["identity-and-approver-authorization:1"]},
+  {"id":"P08","question":"What happens if the requester is also their own manager?","answerable":true,"expected_facts":["self-approval","substitute"],"expected_sources":["identity-and-approver-authorization:3"]},
+  {"id":"P09","question":"When is a repeated request allowed, and who may decide the next approval stage?","answerable":true,"expected_facts":["duplicate","rejected","currently assigned"],"expected_sources":["approval-lifecycle-controls:4","identity-and-approver-authorization:4"]},
+  {"id":"P10","question":"How many Figma licenses are currently free for the Marketing team?","answerable":false,"expected_facts":[],"expected_sources":[]},
+  {"id":"P11","question":"What is the company's maximum software spending limit?","answerable":false,"expected_facts":[],"expected_sources":[]},
+  {"id":"P12","question":"Does company policy authorize rolling back a failed software deployment?","answerable":false,"expected_facts":[],"expected_sources":[]},
+  {"id":"P13","question":"Which roles sign off on an $1,800 request?","answerable":true,"expected_facts":["manager","it lead","order"],"expected_sources":["software-request-approval:2"],"wording_variant_of":"P02"},
+  {"id":"P14","question":"Who needs to approve software that costs four hundred dollars?","answerable":true,"expected_facts":["manager"],"expected_sources":["software-request-approval:2"],"wording_variant_of":"P01"},
+  {"id":"P15","question":"When may an existing named-user software license be reused?","answerable":true,"expected_facts":["employee id","assigned"],"expected_sources":["deployment-and-entitlement-controls:1"]},
+  {"id":"P16","question":"Do offline retries count toward the deployment retry limit, and what is the default attempt count?","answerable":true,"expected_facts":["offline","default three"],"expected_sources":["deployment-and-entitlement-controls:3"]}
+]

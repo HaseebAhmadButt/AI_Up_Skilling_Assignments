@@ -1,5 +1,0 @@
-# Direct dependencies used by the current L3/L2-derived application and planned Chroma RAG layer.
-chromadb>=1.0,<2.0
-langchain>=1.0,<2.0
-langchain-openai>=1.0,<2.0
-python-dotenv>=1.0,<2.0

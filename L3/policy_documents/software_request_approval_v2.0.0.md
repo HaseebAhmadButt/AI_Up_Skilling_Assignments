@@ -22,6 +22,16 @@ This prototype rule maps a positive software request cost to an ordered human ap
 
 The order is mandatory. The implementation labels this rule `v2.0.0`.
 
+For exact retrieval, the cost intervals in cents are:
+
+| Minimum cost (cents, inclusive) | Maximum cost (cents, inclusive) | Required roles |
+| ---: | ---: | --- |
+| 1 | 49,999 | Manager |
+| 50,000 | 250,000 | Manager, IT Lead |
+| 250,001 | 9,007,199,254,740,991 | Manager, IT Lead, Finance Director |
+
+The final maximum is the largest exactly representable integer supported by Chroma numeric metadata; it does not set a business spending cap.
+
 ## §3 — Cost input
 
 The request cost must be one valid positive monetary amount. Zero, negative values, malformed amounts, and text containing additional instructions are invalid. The implementation accepts a leading dollar sign, commas in correctly grouped thousands, and up to two decimal places.

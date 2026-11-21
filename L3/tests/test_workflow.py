@@ -7,10 +7,11 @@ from unittest.mock import patch
 
 from mock_data import clear_notifications, get_employee, sent_notifications
 from tools import get_approval_policy, lookup_requester_manager, lookup_role_holder
+from tools import create_budget_release_request
 from workflow.routing import build_routing_message
 from workflow.scheduler import process_workflows
 from workflow.store import approval_workflows, clear_workflows, create_workflow
-from workflow.submission import submit_request
+from workflow.submission import _test_policy_context, submit_request
 from workflow.validation import validate_agent_result
 from workflow.workflow_tools import (REASON_TOO_SHORT_MESSAGE, REJECTED_MESSAGE, current_step, is_meaningful_reason,
                                      submit_decision)
@@ -43,6 +44,7 @@ def fake_router(workflow):
     if step["decision"] == "REJECTED":
         return f"ACTION: REJECT\nREASON: Rejected by {step['name']}."
     if index + 1 >= len(chain):
+        create_budget_release_request.invoke({"request_id": workflow["request_id"]})
         return "ACTION: COMPLETE\nREASON: All approvers approved."
     return f"ACTION: ASSIGN_NEXT\nNEXT_APPROVER: {chain[index + 1]['name']}\nREASON: Next approver in the list."
 
@@ -218,7 +220,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(workflow["history"][-1]["state"], "rejected")
 
     def test_validator_rejects_tampered_results(self):
-        request = make_request(3000)
+        request = {**make_request(3000), "retrieved_policy": _test_policy_context(3000)}
         good = {"approvers": [
             {"employee_id": "E2001", "name": "Ali Raza", "job_designation": "Manager Marketing Department"},
             {"employee_id": "E3001", "name": "Omar Sheikh", "job_designation": "IT Lead"},
@@ -242,12 +244,35 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(len(approval_workflows[rid]["history"]), history_len)
         self.assertEqual(len(sent_notifications), notified)
 
+    def test_concurrent_duplicate_decisions_only_record_once(self):
+        import threading
+
+        rid = self.submit(1800)["request_id"]
+        barrier = threading.Barrier(3)
+        results = []
+
+        def decide():
+            barrier.wait()
+            results.append(submit_decision(rid, "E2001", "APPROVED"))
+
+        threads = [threading.Thread(target=decide) for _ in range(2)]
+        for thread in threads:
+            thread.start()
+        barrier.wait()
+        for thread in threads:
+            thread.join()
+        self.assertEqual(sum(result["success"] for result in results), 1)
+        self.assertEqual(len([event for event in approval_workflows[rid]["history"]
+                              if event["event"] == "approve"]), 1)
+
     def test_history_order(self):
         rid = self.submit(1800)["request_id"]
         self.decide(rid, "APPROVED")
         self.decide(rid, "APPROVED")
         events = [h["event"] for h in approval_workflows[rid]["history"]]
-        self.assertEqual(events, ["submitted", "notified", "approve", "routed", "notified", "approve", "approved"])
+        self.assertEqual(events, ["policy_retrieved", "submitted", "notified", "approve", "routed",
+                                  "notified", "approve", "budget_release_requested", "budget_release_approved",
+                                  "approved"])
 
     def test_scheduler_reminds_escalates_and_ignores_unregistered(self):
         rid = self.submit(400)["request_id"]

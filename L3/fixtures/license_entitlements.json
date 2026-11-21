@@ -1,0 +1,6 @@
+[
+  {"software_name":"Figma","entitlement_type":"named_user","seat_limit":5,"assigned_users":["E1001","E1003"]},
+  {"software_name":"Slack","entitlement_type":"named_user","seat_limit":1,"assigned_users":["E1002"]},
+  {"software_name":"Zoom","entitlement_type":"named_user","seat_limit":10,"assigned_users":[]},
+  {"software_name":"Notion","entitlement_type":"named_user","seat_limit":2,"assigned_users":["E1001"]}
+]

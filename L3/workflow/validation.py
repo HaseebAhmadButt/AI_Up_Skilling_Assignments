@@ -1,7 +1,7 @@
 """Deterministic validation of the agent's result. The LLM output is never trusted on its own."""
 from decimal import Decimal, InvalidOperation
 
-from mock_data import POLICY_VERSION, get_employee, get_policy_rule, get_role_holder_id, manager_stage_approver_id
+from mock_data import get_employee, get_role_holder_id, manager_stage_approver_id
 from tools._shared import normalize
 
 
@@ -14,7 +14,8 @@ def validate_agent_result(result: dict, request: dict) -> bool:
         return False
     if result.get("error"):
         return False
-    if result.get("policy_version") != POLICY_VERSION:
+    policy = request.get("retrieved_policy")
+    if not isinstance(policy, dict) or result.get("policy_version") != policy.get("version"):
         return False
 
     approvers = result.get("approvers")
@@ -50,7 +51,9 @@ def validate_agent_result(result: dict, request: dict) -> bool:
     if cost <= 0:
         return False
 
-    roles, _ = get_policy_rule(cost)
+    roles = policy.get("required_roles")
+    if not isinstance(roles, list) or not roles or roles[0] != "Manager":
+        return False
     # A typed Manager name is only a check against the record, never a source of the approver.
     typed = normalize(str(request.get("manager_name") or ""))
     if typed and typed != "not provided":
@@ -61,4 +64,6 @@ def validate_agent_result(result: dict, request: dict) -> bool:
         if typed not in on_record:
             return False
     expected = [manager_id] + [get_role_holder_id(normalize(role)) for role in roles[1:]]
+    if any(employee_id is None for employee_id in expected):
+        return False
     return ids == expected

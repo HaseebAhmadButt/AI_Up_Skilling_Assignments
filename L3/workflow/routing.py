@@ -83,6 +83,9 @@ def routing_error(workflow, result):
     if index + 1 >= len(chain):
         if action != "COMPLETE":
             return f"Agent answered {action} after the last approver; it must complete."
+        release = workflow.get("budget_release")
+        if not release or release.get("status") != "approved":
+            return "Agent answered COMPLETE without an approved budget release request."
         return None  # every approver in the chain is APPROVED (checked above)
     if action != "ASSIGN_NEXT":
         return f"Agent answered {action} but another approver is still required."
@@ -130,9 +133,10 @@ def apply_routing(workflow, output, error=None):
         notify_approver(workflow)
     elif action == "COMPLETE":
         update_workflow(request_id, status="approved")
-        step["resulting_state"] = "approved (budget approval complete)"
-        add_history(workflow, "approved", "agent", f"All approvers approved. {reason}")
-        send_notification(requester, f"{request_id} was fully approved.")
+        release = workflow["budget_release"]
+        step["resulting_state"] = f"approved (budget release {release['release_id']} approved)"
+        add_history(workflow, "approved", "agent", f"All approvers and budget release approved. {reason}")
+        send_notification(requester, f"{request_id} was fully approved.", idempotency_key=f"completed:{request_id}")
         log.info("[%s] HANDOFF: budget approval complete; ready for the next workflow stage. "
                  "Software installation is NOT completed by this workflow.", request_id)
     elif action == "REJECT":
@@ -140,10 +144,10 @@ def apply_routing(workflow, output, error=None):
         step["resulting_state"] = "rejected"
         add_history(workflow, "rejected", "agent",
                     f"Request rejected after decision by {step['name']}. Reason: {step.get('reason')}. {reason}")
-        send_notification(requester, f"{request_id} was rejected.")
+        send_notification(requester, f"{request_id} was rejected.", idempotency_key=f"rejected:{request_id}")
     else:
         update_workflow(request_id, status="blocked", block_reason=reason)
         step["resulting_state"] = "blocked"
         add_history(workflow, "blocked", "agent", f"Flow blocked by the Agent. {reason}")
-        send_notification(requester, f"{request_id} was blocked: {reason}")
+        send_notification(requester, f"{request_id} was blocked: {reason}", idempotency_key=f"blocked:{request_id}")
     return action

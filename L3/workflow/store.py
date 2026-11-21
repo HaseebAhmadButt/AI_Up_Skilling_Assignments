@@ -8,8 +8,9 @@ _counter = 0
 
 def next_request_id():
     global _counter
-    _counter += 1
-    return f"REQ-{_counter:04d}"
+    with lock:
+        _counter += 1
+        return f"REQ-{_counter:04d}"
 
 
 def create_workflow(request_id, request, approval_chain):

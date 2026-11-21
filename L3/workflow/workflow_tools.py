@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 
 from mock_data import get_employee, send_notification
-from .store import get_workflow
+from .store import get_workflow, lock
 
 log = logging.getLogger("approval.workflow")
 
@@ -33,7 +33,8 @@ def notify_approver(workflow, now=None):
     if step is None or step["notified_at"] is not None:
         return False
     step["notified_at"] = time.time() if now is None else now
-    send_notification(step["employee_id"], f"Approval needed for {workflow['request_id']}.")
+    send_notification(step["employee_id"], f"Approval needed for {workflow['request_id']}.",
+                      idempotency_key=f"approval:{workflow['request_id']}:{workflow['current_approver_index']}")
     add_history(workflow, "notified", "system", f"Notified {step['name']} ({step['employee_id']}).")
     return True
 
@@ -71,6 +72,11 @@ def _result(workflow, success, message):
 
 def submit_decision(request_id, approver_id, decision, reason=None):
     """Record-only: store an APPROVED/REJECTED decision on the current step. The scheduler processes it."""
+    with lock:
+        return _submit_decision_locked(request_id, approver_id, decision, reason)
+
+
+def _submit_decision_locked(request_id, approver_id, decision, reason=None):
     log.info("[%s] decision attempt: approver=%s decision=%s reason=%r", request_id, approver_id, decision, reason)
     workflow = get_workflow(request_id)
     if workflow is None:

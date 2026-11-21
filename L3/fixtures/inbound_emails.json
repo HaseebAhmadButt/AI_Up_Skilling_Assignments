@@ -1,0 +1,15 @@
+[
+  {
+    "message_id": "fixture-mail-0001",
+    "from": "sara.khan@example.com",
+    "subject": "Software request: Figma",
+    "body": "Software name: Figma\n"
+  },
+  {
+    "message_id": "fixture-mail-0002",
+    "from": "sara.khan@example.com",
+    "in_reply_to": "fixture-mail-0001",
+    "subject": "Re: Software request: Figma",
+    "body": "Request cost: $400\nManager name: Ali Raza\nBusiness justification: Need Figma for design reviews"
+  }
+]

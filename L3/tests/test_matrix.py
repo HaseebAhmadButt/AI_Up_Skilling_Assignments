@@ -12,7 +12,7 @@ from mock_data import clear_notifications, employees, sent_notifications
 from tools import get_approval_policy
 from workflow.scheduler import process_workflows
 from workflow.store import approval_workflows, clear_workflows
-from workflow.submission import submit_request
+from workflow.submission import _test_policy_context, submit_request
 from workflow.validation import validate_agent_result
 from workflow.workflow_tools import current_step, submit_decision
 
@@ -105,7 +105,7 @@ class SubstituteAndIdentity(Base):
         good = {"approvers": [{"employee_id": "E2001", "name": "Ali Raza",
                                "job_designation": "Manager Marketing Department"}],
                 "reason": "x", "policy_version": "v2.0.0", "error": None}
-        request = make_request(400)
+        request = {**make_request(400), "retrieved_policy": _test_policy_context(400)}
         self.assertTrue(validate_agent_result(good, request))
         self.assertFalse(validate_agent_result(good, {**request, "manager_name": "Omar Sheikh"}))
 
@@ -223,7 +223,7 @@ class Rejection(Base):
             workflow = approval_workflows[rid]
             self.assertEqual(workflow["status"], "rejected")
             self.assertEqual([h["event"] for h in workflow["history"]],
-                             ["submitted", "notified", "reject", "rejected"])
+                             ["policy_retrieved", "submitted", "notified", "reject", "rejected"])
             for entry in workflow["history"]:
                 self.assertNotIn("\n", entry["details"])
                 self.assertNotIn("\r", entry["details"])

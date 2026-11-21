@@ -1,10 +1,12 @@
-"""L2 interactive app: employee portal (read-only), approver portals (record decisions only),
-and a background scheduler (the only component that executes workflow transitions).
-All of them share the single in-memory dictionary `approval_workflows`."""
+"""L3 prototype app with employee and approver portals plus simulated email intake.
+Approval transitions remain in the existing workflow scheduler; intake and workflow state are in memory."""
 import logging
 import threading
 
 from app_logging import setup_logging
+from intake import EmailIntakeService, run_fixture_demo
+from installation import memory as installation_memory
+from installation.scheduler import start_installation_scheduler
 from mock_data import get_employee
 from workflow.scheduler import process_workflows
 from workflow.store import approval_workflows, lock
@@ -23,8 +25,106 @@ MENU = (
     "3. Manager Portal - View and Process Assigned Requests.\n"
     "4. IT Lead Portal - View and Process Assigned Requests.\n"
     "5. Finance Director Portal - View and Process Assigned Requests.\n"
-    "6. Exit Application.\n"
+    "6. Run Simulated Email Intake Demo.\n"
+    "7. Installation and IT Pending Status.\n"
+    "8. Review IT Packaging Requests.\n"
+    "9. Policy Assistant (Chroma RAG).\n"
+    "10. Exit Application.\n"
 )
+
+email_intake_demo = EmailIntakeService()
+
+
+def installation_status_board():
+    """Display the separate installation memory and IT packaging queue."""
+    print(f"\nRegistered fixture devices: {len(installation_memory.device_registry)}")
+    print(f"Approved fixture software: {len(installation_memory.approved_software_catalog)}")
+    requests = installation_memory.list_installation_requests()
+    print("\n===== Installation Memory =====")
+    if not requests:
+        print("No fully approved requests have been handed to the installation Agent yet.")
+    for request in requests:
+        print(f"\n{request['request_id']} | {request['software_name']} | {request['status']}")
+        print(f"  Employee: {request['employee_id']} ({request['requester_email']})")
+        print(f"  Device: {request.get('device_id') or 'Awaiting Agent selection'}")
+        print(f"  Owner: {request['owner']}")
+        print(f"  Next action: {request['next_action']}")
+        for event in request["history"]:
+            print(f"  {event['timestamp']} {event['event']} — {event['actor']}: {event['details']}")
+
+    pending = installation_memory.list_it_pending_items()
+    print("\n===== IT Pending Software =====")
+    if not pending:
+        print("No software is waiting for packaging approval.")
+    for item in pending:
+        print(f"{item['pending_id']} | {item['software_name']} | {item['status']} | "
+              f"request {item['request_id']} | {item['requested_version']}")
+
+
+def review_it_packaging_requests():
+    """Let IT review pending packaging and publish an approved simulated package version."""
+    pending = [item for item in installation_memory.list_it_pending_items() if item["status"] == "pending"]
+    if not pending:
+        print("\nNo IT packaging requests are awaiting a decision.")
+        return
+    print("\n===== IT Packaging Requests Awaiting Decision =====")
+    for index, item in enumerate(pending, 1):
+        request = installation_memory.get_installation_request(item["request_id"])
+        device = installation_memory.device_registry.get(item["device_id"], {})
+        print(f"\n[{index}] {item['pending_id']} | {item['software_name']} | {item['requested_version']}")
+        print(f"  Request: {item['request_id']} | Employee: {item['employee_id']} ({item['requester_email']})")
+        print(f"  Device: {item['device_id']} ({device.get('os', 'unknown OS')})")
+        print(f"  Reason: {item['reason']}")
+        print(f"  Request status: {request['status']} | Next action: {request['next_action']}")
+
+    selection = input("Select a request number, or B to go back: ").strip().lower()
+    if selection == "b":
+        return
+    if not selection.isdigit() or not 1 <= int(selection) <= len(pending):
+        print("Invalid selection.")
+        return
+    item = pending[int(selection) - 1]
+    decision = input("Decision (A)pprove or (R)eject: ").strip().lower()
+    if decision in {"a", "approve"}:
+        package_id = read_required("Approved package ID: ")
+        version = read_required("Approved package version: ")
+        license_required = input("Does this package require a named-user license? (Y/N): ").strip().lower()
+        if license_required not in {"y", "yes", "n", "no"}:
+            print("Enter Y or N; no change was made.")
+            return
+        license_required = license_required in {"y", "yes"}
+        seat_limit = read_positive_integer("Total named-user license seats: ") if license_required else None
+        result = installation_memory.decide_it_pending_item(
+            item["request_id"], "approve", package_id=package_id, version=version,
+            license_required=license_required, seat_limit=seat_limit)
+    elif decision in {"r", "reject"}:
+        result = installation_memory.decide_it_pending_item(item["request_id"], "reject")
+    else:
+        print("Invalid decision; no change was made.")
+        return
+    if result["success"]:
+        if result["status"] == "approved":
+            print(f"Approved {result['package_id']} {result['version']}; the Agent will retry this request automatically.")
+        else:
+            print("Packaging request rejected. The software request remains open for IT review.")
+    else:
+        print(f"Could not record the decision: {result['error']}")
+
+
+def policy_assistant_portal():
+    """Answer policy questions from retrieved Chroma sections with citations or refuse."""
+    from policy.assistant import answer_policy_question
+
+    while True:
+        question = input("Policy question (B to go back): ").strip()
+        if question.lower() == "b":
+            return
+        result = answer_policy_question(question)
+        print(f"\n{result['answer']}")
+        if result["citations"]:
+            print("Sources:")
+            for citation in result["citations"]:
+                print(f"  - {citation}")
 
 DECISION_LABELS = {"approve": "APPROVED", "reject": "REJECTED", "APPROVED": "APPROVED", "REJECTED": "REJECTED"}
 
@@ -39,6 +139,23 @@ def read_required(prompt_text):
         if value:
             return value
         print("This field is required. Please try again.")
+
+
+def read_optional(prompt_text):
+    return input(prompt_text).strip() or None
+
+
+def read_positive_integer(prompt_text):
+    while True:
+        raw = input(prompt_text).strip()
+        try:
+            value = int(raw)
+        except ValueError:
+            print("Enter a whole number greater than zero.")
+            continue
+        if value > 0:
+            return value
+        print("Enter a whole number greater than zero.")
 
 
 def read_cost():
@@ -75,14 +192,21 @@ def read_user_request():
     manager_name = read_required("Manager name: ")
     software_name = read_required("Software name: ")
     business_justification = read_required("Business justification: ")
+    requested_version = read_optional("Requested version (blank means latest approved): ")
+    device_id = read_optional("Laptop/device ID (blank means registered employee device): ")
+    license_details = read_optional("License details, if known (optional): ")
 
     return {
         "request_cost": request_cost,
+        "cost_currency": "USD",
         "requester_identity": requester_identity,
         "requester_email": requester_email,
         "manager_name": manager_name,
         "policy_context": software_name,
         "business_justification": business_justification,
+        "requested_version": requested_version,
+        "device_id": device_id,
+        "license_details": license_details,
     }
 
 
@@ -131,6 +255,7 @@ def print_summary(workflow, indent=""):
     print(f"{indent}Requester email:      {request.get('requester_email', 'Not provided')}")
     print(f"{indent}Software:             {request.get('policy_context', 'Not provided')}")
     print(f"{indent}Request cost:         ${float(request['request_cost']):,.2f}")
+    print(f"{indent}Cost currency:        {request.get('cost_currency', 'USD')}")
     print(f"{indent}Request status:       {workflow['status'].upper()}")
     print(f"{indent}Approval stage:       {stage_text(workflow)}")
     print(f"{indent}Assigned approver:    {assigned_text(workflow)}")
@@ -157,8 +282,12 @@ def print_details(workflow, indent="  "):
     status = workflow["status"]
     if status == "rejected":
         print(f"{indent}Rejection reason: {workflow.get('rejection_reason') or 'Not provided'}")
-    budget = {"approved": "APPROVED", "rejected": "REJECTED", "blocked": "BLOCKED", "escalated": "ESCALATED"}.get(status, "PENDING")
+    release = workflow.get("budget_release")
+    budget = ("APPROVED" if release and release.get("status") == "approved" else
+              {"rejected": "REJECTED", "blocked": "BLOCKED", "escalated": "ESCALATED"}.get(status, "PENDING"))
     print(f"{indent}Budget approval:      {budget}")
+    if release:
+        print(f"{indent}Budget release:       {release['release_id']} ({release['approval_mode']})")
     if status == "approved":
         print(f"{indent}Next-stage handoff:   Budget approved. Software installation is NOT completed by this workflow.")
     else:
@@ -174,8 +303,12 @@ def print_details(workflow, indent="  "):
 def create_request():
     outcome = submit_request(read_user_request())
     if not outcome["success"]:
-        label = "Technical failure (agent unavailable); no request was created" \
-            if outcome["error_type"] == "technical" else "Request rejected by business rules; no request was created"
+        if outcome["error_type"] == "policy_retrieval":
+            label = "Approval policy could not be retrieved from ChromaDB; no workflow was created"
+        elif outcome["error_type"] == "technical":
+            label = "Technical failure (agent unavailable); no request was created"
+        else:
+            label = "Request rejected by business rules; no request was created"
         print(f"\n{label}:\n  {outcome['error']}")
         return
     with lock:
@@ -333,11 +466,12 @@ def main():
     log.info("Application started")
     stop_event = threading.Event()
     start_scheduler(stop_event)
+    start_installation_scheduler(stop_event)
     portals = {"3": "Manager", "4": "IT Lead", "5": "Finance Director"}
     try:
         while True:
             print(MENU)
-            choice = input("Select an option (1-6): ").strip()
+            choice = input("Select an option (1-10): ").strip()
             log.info("Menu selection: %r", choice)
             if choice == "1":
                 create_request()
@@ -346,10 +480,18 @@ def main():
             elif choice in portals:
                 approver_portal(portals[choice])
             elif choice == "6":
+                run_fixture_demo(email_intake_demo)
+            elif choice == "7":
+                installation_status_board()
+            elif choice == "8":
+                review_it_packaging_requests()
+            elif choice == "9":
+                policy_assistant_portal()
+            elif choice == "10":
                 print("Exiting application.")
                 break
             else:
-                print("Invalid selection. Please enter a number from 1 to 6.")
+                print("Invalid selection. Please enter a number from 1 to 10.")
     except (KeyboardInterrupt, EOFError):
         print("\nExiting application.")
     finally:

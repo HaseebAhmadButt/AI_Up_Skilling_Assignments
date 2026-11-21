@@ -76,6 +76,7 @@ def _remind_or_escalate(workflow, now, stale_after, max_reminders, summary):
         # Send another reminder, restart the stale timer, and record it in history.
         step["reminders"] += 1
         step["notified_at"] = now
-        send_notification(step["employee_id"], f"Reminder: approval pending for {request_id}.")
+        send_notification(step["employee_id"], f"Reminder: approval pending for {request_id}.",
+                          idempotency_key=f"reminder:{request_id}:{workflow['current_approver_index']}:{step['reminders']}")
         add_history(workflow, "reminder", "scheduler", f"Reminder {step['reminders']} sent to {step['name']}.")
         summary["reminded"].append(request_id)

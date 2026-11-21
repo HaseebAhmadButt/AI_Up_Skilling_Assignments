@@ -1,0 +1,57 @@
+[
+  {
+    "software_name": "Figma",
+    "package_id": "figma-desktop",
+    "license_required": true,
+    "user_scope_installable": true,
+    "requires_admin": false,
+    "versions": [
+      {"version":"1.0.0","release_rank":1,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]},
+      {"version":"1.1.0","release_rank":2,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]}
+    ]
+  },
+  {
+    "software_name": "Slack",
+    "package_id": "slack-desktop",
+    "license_required": true,
+    "user_scope_installable": true,
+    "requires_admin": false,
+    "versions": [
+      {"version":"4.0.0","release_rank":1,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]},
+      {"version":"4.1.0","release_rank":2,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]}
+    ]
+  },
+  {
+    "software_name": "Visual Studio Code",
+    "package_id": "vscode-user",
+    "license_required": false,
+    "user_scope_installable": true,
+    "requires_admin": false,
+    "versions": [
+      {"version":"1.90.0","release_rank":1,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]},
+      {"version":"1.91.0","release_rank":2,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]}
+    ]
+  },
+  {
+    "software_name": "Zoom",
+    "package_id": "zoom-workplace-user",
+    "license_required": true,
+    "user_scope_installable": true,
+    "requires_admin": false,
+    "versions": [
+      {"version":"6.1.0","release_rank":1,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]},
+      {"version":"6.2.0","release_rank":2,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]}
+    ]
+  },
+  {
+    "software_name": "Notion",
+    "package_id": "notion-desktop-user",
+    "license_required": true,
+    "user_scope_installable": true,
+    "requires_admin": false,
+    "versions": [
+      {"version":"3.0.0","release_rank":1,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]},
+      {"version":"3.1.0","release_rank":2,"approved":true,"available":true,"supported_os":["Windows","macOS"],"required_checks":["user_profile_install","application_launch"]}
+    ]
+  }
+]
