@@ -1,0 +1,5 @@
+# Direct third-party dependencies used by L1/L2 and the L3 ChromaDB prototype.
+chromadb
+langchain
+langchain-openai
+python-dotenv
